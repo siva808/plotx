@@ -147,6 +147,9 @@ def get_leads():
 
 
 # ─── Init ──────────────────────────────────────────────────────────────────────
+@app.route('/health')
+def health():
+    return {'status': 'ok'}, 200
 
 with app.app_context():
     db.create_all()
