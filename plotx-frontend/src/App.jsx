@@ -1116,7 +1116,7 @@ function AdminLogin({ onLogin }) {
         <button style={{ ...S.btn("primary"),width:"100%",padding:"14px" }} onClick={login} disabled={loading}>
           {loading?"Signing in…":"Sign In"}
         </button>
-        <p style={{ color:T.muted,fontSize:"11px",marginTop:"16px",textAlign:"center" }}>Default: admin / plotx2024</p>
+        <p style={{ color:T.muted,fontSize:"11px",marginTop:"16px",textAlign:"center" }}>Welcome to the Admin Portal</p>
       </div>
     </div>
   );
