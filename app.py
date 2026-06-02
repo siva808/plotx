@@ -29,7 +29,8 @@ class Poster(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-    category = db.Column(db.Enum('real_estate', 'construction', 'interior'), nullable=False)
+    # NEW - with name ✅
+    category = db.Column(db.Enum('real_estate', 'construction', 'interior', name='poster_category'), nullable=False)
     image_path = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
