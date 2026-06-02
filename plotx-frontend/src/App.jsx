@@ -5,9 +5,9 @@ const WA_NUMBER2 = "919944435256";
 const FB_URL = "https://facebook.com/plotxchennai";
 const IG_URL = "https://instagram.com/plotxchennai";
 const TG_URL = "https://t.me/plotx7743";
+const API = "https://plotx-backend-q3pq.onrender.com/api";
+const BASE_URL = "https://plotx-backend-q3pq.onrender.com";
 
-const API = "http://localhost:5000/api";
-const BASE_URL = "http://localhost:5000";
 
 /* ── API Helpers ────────────────────────────────────────────────────── */
 const getToken = () => localStorage.getItem("plotx_token");
