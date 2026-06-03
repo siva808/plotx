@@ -8,6 +8,16 @@ const TG_URL = "https://t.me/plotx7743";
 const API = "https://plotx-backend-q3pq.onrender.com/api";
 const BASE_URL = "https://plotx-backend-q3pq.onrender.com";
 
+/* ── Mobile Hook ────────────────────────────────────────────────────── */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return isMobile;
+}
 
 /* ── API Helpers ────────────────────────────────────────────────────── */
 const getToken = () => localStorage.getItem("plotx_token");
@@ -16,7 +26,6 @@ const apiFetch = async (path, options = {}) => {
   const token = getToken();
   const headers = { ...(options.headers || {}) };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  // Don't set Content-Type for FormData (browser sets it with boundary)
   if (!(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
@@ -138,6 +147,7 @@ function HeroCarousel({ onEnquire, setRoute }) {
   const [prev, setPrev] = useState(null);
   const [animating, setAnimating] = useState(false);
   const timerRef = useRef(null);
+  const isMobile = useIsMobile();
 
   const goTo = (i) => {
     if (animating || i === cur) return;
@@ -163,7 +173,7 @@ function HeroCarousel({ onEnquire, setRoute }) {
   const prevSlide = prev !== null ? SLIDES[prev] : null;
 
   return (
-    <div style={{ position:"relative", height:"100vh", minHeight:"600px", overflow:"hidden", paddingTop:"68px" }}>
+    <div style={{ position:"relative", height:"100vh", minHeight: isMobile ? "580px" : "600px", overflow:"hidden", paddingTop:"68px" }}>
       {prevSlide && (
         <div style={{
           position:"absolute", inset:0,
@@ -183,12 +193,14 @@ function HeroCarousel({ onEnquire, setRoute }) {
         transition:"opacity 0.7s ease, transform 0.7s ease",
         zIndex:2
       }}>
-        <div style={{ position:"absolute", inset:0, background:slide.overlay }} />
-        <div style={{
-          position:"absolute", right:"8%", top:"50%", transform:"translateY(-50%)",
-          fontSize:"clamp(120px,20vw,260px)", opacity:0.06, userSelect:"none",
-          filter:"blur(2px)"
-        }}>{slide.icon}</div>
+        <div style={{ position:"absolute", inset:0, background: isMobile ? "rgba(15,23,42,0.75)" : slide.overlay }} />
+        {!isMobile && (
+          <div style={{
+            position:"absolute", right:"8%", top:"50%", transform:"translateY(-50%)",
+            fontSize:"clamp(120px,20vw,260px)", opacity:0.06, userSelect:"none",
+            filter:"blur(2px)"
+          }}>{slide.icon}</div>
+        )}
         <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", opacity:0.04, zIndex:0 }} xmlns="http://www.w3.org/2000/svg">
           {Array.from({length:12},(_,i)=>(
             <line key={`v${i}`} x1={`${(i+1)*8.33}%`} y1="0" x2={`${(i+1)*8.33}%`} y2="100%" stroke="white" strokeWidth="1"/>
@@ -198,16 +210,17 @@ function HeroCarousel({ onEnquire, setRoute }) {
           ))}
         </svg>
       </div>
+
       <div style={{
         position:"relative", zIndex:10,
         height:"100%", display:"flex", alignItems:"center",
-        padding:"0 clamp(24px,6vw,96px)"
+        padding: isMobile ? "0 20px" : "0 clamp(24px,6vw,96px)"
       }}>
-        <div style={{ maxWidth:"660px" }}>
+        <div style={{ maxWidth: isMobile ? "100%" : "660px", width:"100%" }}>
           <div style={{
             display:"inline-flex", alignItems:"center", gap:"8px",
             background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.2)",
-            padding:"6px 16px", borderRadius:"20px", marginBottom:"28px"
+            padding:"6px 16px", borderRadius:"20px", marginBottom: isMobile ? "16px" : "28px"
           }}>
             <span style={{ width:"8px", height:"8px", borderRadius:"50%", background:slide.accent, display:"inline-block" }} />
             <span style={{ color:slide.accent, fontSize:"12px", fontWeight:"700", letterSpacing:"1.5px", textTransform:"uppercase" }}>
@@ -216,8 +229,8 @@ function HeroCarousel({ onEnquire, setRoute }) {
           </div>
           <h1 style={{
             color:"#fff", fontWeight:"800", lineHeight:"1.08",
-            fontSize:"clamp(2.8rem,6vw,5.2rem)",
-            margin:"0 0 24px", letterSpacing:"-0.5px"
+            fontSize: isMobile ? "2.4rem" : "clamp(2.8rem,6vw,5.2rem)",
+            margin: isMobile ? "0 0 16px" : "0 0 24px", letterSpacing:"-0.5px"
           }}>
             {slide.headline.map((line, i) => (
               <span key={i} style={{ display:"block" }}>
@@ -226,30 +239,50 @@ function HeroCarousel({ onEnquire, setRoute }) {
             ))}
           </h1>
           <p style={{
-            color:"rgba(255,255,255,0.72)", fontSize:"clamp(1rem,2vw,1.15rem)",
-            lineHeight:"1.7", marginBottom:"40px", maxWidth:"500px"
+            color:"rgba(255,255,255,0.72)", fontSize: isMobile ? "0.95rem" : "clamp(1rem,2vw,1.15rem)",
+            lineHeight:"1.7", marginBottom: isMobile ? "28px" : "40px", maxWidth:"500px"
           }}>{slide.sub}</p>
-          <div style={{ display:"flex", gap:"16px", flexWrap:"wrap" }}>
-            <button style={S.btn("white")} onClick={() => setRoute(slide.route)}>
+          <div style={{ display:"flex", gap:"12px", flexWrap:"wrap" }}>
+            <button
+              style={{ ...S.btn("white"), fontSize: isMobile ? "13px" : "14px", padding: isMobile ? "11px 20px" : "12px 28px" }}
+              onClick={() => setRoute(slide.route)}>
               Explore {slide.tag}
             </button>
-            <button style={{ ...S.btn("ghost"), display:"inline-flex", alignItems:"center", gap:"8px", padding:"12px 24px" }}
+            <button
+              style={{ ...S.btn("ghost"), display:"inline-flex", alignItems:"center", gap:"8px", padding: isMobile ? "11px 18px" : "12px 24px", fontSize: isMobile ? "13px" : "14px" }}
               onClick={() => onEnquire("Hero — General Enquiry", slide.tag)}>
               Book a Site Visit
             </button>
           </div>
-          <div style={{ display:"flex", gap:"40px", marginTop:"56px", flexWrap:"wrap" }}>
-            {[["Chennai","Location"],["Porur & Beyond","Coverage"],["9710918099","Call Now"]].map(([v,l])=>(
-              <div key={l}>
-                <div style={{ color:"#fff", fontWeight:"700", fontSize:"1rem" }}>{v}</div>
-                <div style={{ color:"rgba(255,255,255,0.45)", fontSize:"11px", letterSpacing:"1px", textTransform:"uppercase", marginTop:"2px" }}>{l}</div>
-              </div>
-            ))}
-          </div>
+
+          {!isMobile && (
+            <div style={{ display:"flex", gap:"40px", marginTop:"56px", flexWrap:"wrap" }}>
+              {[["Chennai","Location"],["Porur & Beyond","Coverage"],["9710918099","Call Now"]].map(([v,l])=>(
+                <div key={l}>
+                  <div style={{ color:"#fff", fontWeight:"700", fontSize:"1rem" }}>{v}</div>
+                  <div style={{ color:"rgba(255,255,255,0.45)", fontSize:"11px", letterSpacing:"1px", textTransform:"uppercase", marginTop:"2px" }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {isMobile && (
+            <div style={{ display:"flex", gap:"24px", marginTop:"28px" }}>
+              {[["Chennai","Location"],["Porur","Coverage"]].map(([v,l])=>(
+                <div key={l}>
+                  <div style={{ color:"#fff", fontWeight:"700", fontSize:"0.9rem" }}>{v}</div>
+                  <div style={{ color:"rgba(255,255,255,0.45)", fontSize:"10px", letterSpacing:"1px", textTransform:"uppercase", marginTop:"2px" }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
       <div style={{
-        position:"absolute", bottom:"40px", left:"clamp(24px,6vw,96px)",
+        position:"absolute", bottom: isMobile ? "24px" : "40px",
+        left: isMobile ? "50%" : "clamp(24px,6vw,96px)",
+        transform: isMobile ? "translateX(-50%)" : "none",
         display:"flex", gap:"8px", zIndex:10
       }}>
         {SLIDES.map((s,i) => (
@@ -263,16 +296,21 @@ function HeroCarousel({ onEnquire, setRoute }) {
           />
         ))}
       </div>
-      <button onClick={() => goTo((cur-1+SLIDES.length)%SLIDES.length)}
-        style={{ position:"absolute", left:"24px", top:"50%", transform:"translateY(-50%)",
-          zIndex:10, background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
-          color:"#fff", width:"44px", height:"44px", borderRadius:"50%", cursor:"pointer",
-          fontSize:"18px", display:"flex", alignItems:"center", justifyContent:"center" }}>‹</button>
-      <button onClick={() => goTo((cur+1)%SLIDES.length)}
-        style={{ position:"absolute", right:"24px", top:"50%", transform:"translateY(-50%)",
-          zIndex:10, background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
-          color:"#fff", width:"44px", height:"44px", borderRadius:"50%", cursor:"pointer",
-          fontSize:"18px", display:"flex", alignItems:"center", justifyContent:"center" }}>›</button>
+
+      {!isMobile && (
+        <>
+          <button onClick={() => goTo((cur-1+SLIDES.length)%SLIDES.length)}
+            style={{ position:"absolute", left:"24px", top:"50%", transform:"translateY(-50%)",
+              zIndex:10, background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
+              color:"#fff", width:"44px", height:"44px", borderRadius:"50%", cursor:"pointer",
+              fontSize:"18px", display:"flex", alignItems:"center", justifyContent:"center" }}>‹</button>
+          <button onClick={() => goTo((cur+1)%SLIDES.length)}
+            style={{ position:"absolute", right:"24px", top:"50%", transform:"translateY(-50%)",
+              zIndex:10, background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
+              color:"#fff", width:"44px", height:"44px", borderRadius:"50%", cursor:"pointer",
+              fontSize:"18px", display:"flex", alignItems:"center", justifyContent:"center" }}>›</button>
+        </>
+      )}
     </div>
   );
 }
@@ -321,12 +359,20 @@ function LeadModal({ open, onClose, context, service }) {
     <div style={{
       position:"fixed", inset:0, zIndex:300,
       background:"rgba(15,23,42,0.65)", backdropFilter:"blur(8px)",
-      display:"flex", alignItems:"center", justifyContent:"center", padding:"20px"
-    }}>
+      display:"flex", alignItems:"flex-end", justifyContent:"center", padding:"0"
+    }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
       <div style={{
-        background:T.white, borderRadius:"16px", width:"100%", maxWidth:"460px",
-        padding:"40px", boxShadow:"0 24px 64px rgba(0,0,0,0.24)"
+        background:T.white,
+        borderRadius:"20px 20px 0 0",
+        width:"100%", maxWidth:"460px",
+        padding:"32px 24px 40px",
+        boxShadow:"0 -8px 40px rgba(0,0,0,0.2)",
       }}>
+        {/* Drag handle */}
+        <div style={{ width:"40px", height:"4px", borderRadius:"2px", background:T.line, margin:"0 auto 24px" }} />
+
         {done ? (
           <div style={{ textAlign:"center", padding:"20px 0" }}>
             <div style={{
@@ -339,10 +385,10 @@ function LeadModal({ open, onClose, context, service }) {
           </div>
         ) : (
           <>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"24px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"20px" }}>
               <div>
                 <span style={S.tag(T.blue)}>Book a Site Visit</span>
-                <h3 style={{ color:T.slate, fontSize:"1.4rem", fontWeight:"700", margin:"12px 0 4px" }}>Get in Touch</h3>
+                <h3 style={{ color:T.slate, fontSize:"1.3rem", fontWeight:"700", margin:"10px 0 4px" }}>Get in Touch</h3>
                 <p style={{ color:T.muted, fontSize:"13px" }}>{context}</p>
               </div>
               <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", color:T.muted, fontSize:"22px", padding:"0", lineHeight:1 }}>×</button>
@@ -351,9 +397,9 @@ function LeadModal({ open, onClose, context, service }) {
               <p style={{ color:T.red, fontSize:"13px", marginBottom:"14px", padding:"10px 14px", background:"#FEF2F2", borderRadius:"6px" }}>{error}</p>
             )}
             {["name","email","mobile"].map(f => (
-              <div key={f} style={{ marginBottom:"16px" }}>
+              <div key={f} style={{ marginBottom:"14px" }}>
                 <label style={S.label}>{f === "mobile" ? "Phone Number" : f === "name" ? "Full Name" : "Email Address"}</label>
-                <input style={S.input} type={f==="email"?"email":f==="mobile"?"tel":"text"}
+                <input style={{ ...S.input, fontSize:"16px" }} type={f==="email"?"email":f==="mobile"?"tel":"text"}
                   value={form[f]}
                   placeholder={f==="name"?"e.g. Ravi Kumar":f==="email"?"you@email.com":"9876543210"}
                   onChange={e=>setForm({...form,[f]:e.target.value})}
@@ -362,13 +408,13 @@ function LeadModal({ open, onClose, context, service }) {
                 />
               </div>
             ))}
-            <button style={{ ...S.btn("primary"), width:"100%", marginTop:"8px", padding:"14px" }}
+            <button style={{ ...S.btn("primary"), width:"100%", marginTop:"8px", padding:"16px", fontSize:"16px" }}
               onClick={submit} disabled={loading}>
               {loading ? "Sending…" : "Submit Enquiry"}
             </button>
-            <p style={{ textAlign:"center", marginTop:"16px", fontSize:"12px", color:T.muted }}>
-              Or WhatsApp us directly:{" "}
-              <a href={` https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} target="_blank" rel="noopener noreferrer"
+            <p style={{ textAlign:"center", marginTop:"16px", fontSize:"13px", color:T.muted }}>
+              Or WhatsApp us:{" "}
+              <a href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} target="_blank" rel="noopener noreferrer"
                 style={{ color:T.green, fontWeight:"600", textDecoration:"none" }}>9710918099</a>
             </p>
           </>
@@ -388,7 +434,6 @@ function PosterCard({ poster, onEnquire }) {
   };
   const meta = catMeta[poster.category] || catMeta.real_estate;
 
-  // Support both API image_path and legacy base64 image_data
   const imgSrc = poster.image_path
     ? `${BASE_URL}${poster.image_path}`
     : poster.image_data || null;
@@ -508,6 +553,7 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
   const info = SERVICE_INFO[serviceKey];
   const [posters, setPosters] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -522,59 +568,63 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
     <div style={S.page}>
       {/* Hero */}
       <div style={{
-        background: info.bg, paddingTop:"68px", minHeight:"60vh",
+        background: info.bg, paddingTop:"68px", minHeight: isMobile ? "auto" : "60vh",
         display:"flex", alignItems:"center", position:"relative", overflow:"hidden"
       }}>
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.2) 100%)" }} />
-        <div style={{
-          position:"absolute", right:"8%", top:"50%", transform:"translateY(-50%)",
-          fontSize:"clamp(120px,18vw,220px)", opacity:0.07, userSelect:"none"
-        }}>{info.icon}</div>
-        <div style={{ position:"relative", zIndex:2, padding:"60px clamp(24px,6vw,96px)" }}>
+        {!isMobile && (
+          <div style={{
+            position:"absolute", right:"8%", top:"50%", transform:"translateY(-50%)",
+            fontSize:"clamp(120px,18vw,220px)", opacity:0.07, userSelect:"none"
+          }}>{info.icon}</div>
+        )}
+        <div style={{ position:"relative", zIndex:2, padding: isMobile ? "40px 20px 48px" : "60px clamp(24px,6vw,96px)" }}>
           <button onClick={onBack} style={{
             background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.25)",
             color:"rgba(255,255,255,0.8)", borderRadius:"8px", padding:"8px 16px",
             cursor:"pointer", fontFamily:font, fontSize:"13px", fontWeight:"600",
-            marginBottom:"24px", display:"flex", alignItems:"center", gap:"6px"
+            marginBottom:"20px", display:"flex", alignItems:"center", gap:"6px"
           }}>← Back to Home</button>
           <div style={{
             display:"inline-flex", alignItems:"center", gap:"8px",
             background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.2)",
-            padding:"6px 16px", borderRadius:"20px", marginBottom:"20px"
+            padding:"6px 16px", borderRadius:"20px", marginBottom:"16px"
           }}>
             <span style={{ width:"8px", height:"8px", borderRadius:"50%", background:info.accent, display:"inline-block" }} />
             <span style={{ color:info.accent, fontSize:"12px", fontWeight:"700", letterSpacing:"1.5px", textTransform:"uppercase" }}>{info.label}</span>
           </div>
           <h1 style={{
             color:"#fff", fontWeight:"800", lineHeight:"1.1",
-            fontSize:"clamp(2.2rem,5vw,4rem)", margin:"0 0 20px", maxWidth:"700px"
+            fontSize: isMobile ? "2rem" : "clamp(2.2rem,5vw,4rem)",
+            margin:"0 0 16px", maxWidth:"700px"
           }}>{info.tagline}</h1>
-          <p style={{ color:"rgba(255,255,255,0.72)", fontSize:"1.1rem", lineHeight:"1.7", maxWidth:"560px", marginBottom:"36px" }}>
+          <p style={{ color:"rgba(255,255,255,0.72)", fontSize: isMobile ? "0.95rem" : "1.1rem", lineHeight:"1.7", maxWidth:"560px", marginBottom:"28px" }}>
             {info.desc}
           </p>
-          <button style={{ ...S.btn("white"), fontSize:"15px" }} onClick={() => onEnquire(info.cta, info.label)}>
+          <button style={{ ...S.btn("white"), fontSize:"14px", width: isMobile ? "100%" : "auto" }}
+            onClick={() => onEnquire(info.cta, info.label)}>
             {info.cta}
           </button>
         </div>
       </div>
 
       {/* Process Bar */}
-      <div style={{ background:T.white, borderBottom:`1px solid ${T.line}`, padding:"32px 0" }}>
-        <div style={{ maxWidth:"1000px", margin:"0 auto", padding:"0 48px" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"0", flexWrap:"wrap" }}>
+      <div style={{ background:T.white, borderBottom:`1px solid ${T.line}`, padding: isMobile ? "24px 16px" : "32px 0", overflowX:"auto" }}>
+        <div style={{ maxWidth:"1000px", margin:"0 auto", padding: isMobile ? "0" : "0 48px" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent: isMobile ? "flex-start" : "center", gap:"0", minWidth: isMobile ? "max-content" : "auto", padding: isMobile ? "0 4px" : "0" }}>
             {info.process.map((step, i) => (
               <div key={step} style={{ display:"flex", alignItems:"center" }}>
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"8px" }}>
                   <div style={{
-                    width:"40px", height:"40px", borderRadius:"50%",
+                    width: isMobile ? "32px" : "40px", height: isMobile ? "32px" : "40px", borderRadius:"50%",
                     background: info.color+"18", border:`2px solid ${info.color}`,
                     display:"flex", alignItems:"center", justifyContent:"center",
-                    fontWeight:"700", fontSize:"14px", color:info.color
+                    fontWeight:"700", fontSize: isMobile ? "12px" : "14px", color:info.color
                   }}>{i+1}</div>
-                  <span style={{ fontSize:"12px", fontWeight:"600", color:T.slate, whiteSpace:"nowrap" }}>{step}</span>
+                  <span style={{ fontSize: isMobile ? "10px" : "12px", fontWeight:"600", color:T.slate, whiteSpace:"nowrap" }}>{step}</span>
                 </div>
                 {i < info.process.length - 1 && (
-                  <div style={{ width:"60px", height:"2px", background:`linear-gradient(to right, ${info.color}, ${info.color}44)`, margin:"0 8px", marginBottom:"20px" }} />
+                  <div style={{ width: isMobile ? "32px" : "60px", height:"2px", background:`linear-gradient(to right, ${info.color}, ${info.color}44)`, margin: isMobile ? "0 4px" : "0 8px", marginBottom:"20px" }} />
                 )}
               </div>
             ))}
@@ -583,17 +633,17 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
       </div>
 
       {/* Features Grid */}
-      <section style={{ padding:"80px 48px", maxWidth:"1200px", margin:"0 auto" }}>
-        <div style={{ textAlign:"center", marginBottom:"56px" }}>
+      <section style={{ padding: isMobile ? "48px 20px" : "80px 48px", maxWidth:"1200px", margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom: isMobile ? "32px" : "56px" }}>
           <span style={S.tag(info.color)}>Why Choose Us</span>
-          <h2 style={{ fontSize:"clamp(1.8rem,4vw,2.6rem)", fontWeight:"800", color:T.slate, margin:"16px 0 12px" }}>
+          <h2 style={{ fontSize: isMobile ? "1.6rem" : "clamp(1.8rem,4vw,2.6rem)", fontWeight:"800", color:T.slate, margin:"16px 0 12px" }}>
             What We Offer
           </h2>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"24px" }}>
+        <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit,minmax(260px,1fr))", gap:"20px" }}>
           {info.features.map(f => (
-            <div key={f.title} style={{ ...S.card, padding:"28px", borderTop:`3px solid ${info.color}` }}>
-              <div style={{ fontSize:"2rem", marginBottom:"14px" }}>{f.icon}</div>
+            <div key={f.title} style={{ ...S.card, padding:"24px", borderTop:`3px solid ${info.color}` }}>
+              <div style={{ fontSize:"1.8rem", marginBottom:"12px" }}>{f.icon}</div>
               <h3 style={{ color:T.slate, fontSize:"1rem", fontWeight:"700", margin:"0 0 10px" }}>{f.title}</h3>
               <p style={{ color:T.slateM, fontSize:"13px", lineHeight:"1.7", margin:0 }}>{f.desc}</p>
             </div>
@@ -602,16 +652,16 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
       </section>
 
       {/* Listings */}
-      <section style={{ background:T.white, padding:"80px 0" }}>
-        <div style={{ padding:"0 48px", maxWidth:"1200px", margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"40px", flexWrap:"wrap", gap:"16px" }}>
+      <section style={{ background:T.white, padding: isMobile ? "48px 0" : "80px 0" }}>
+        <div style={{ padding: isMobile ? "0 16px" : "0 48px", maxWidth:"1200px", margin:"0 auto" }}>
+          <div style={{ display:"flex", alignItems: isMobile ? "flex-start" : "center", justifyContent:"space-between", marginBottom:"32px", flexDirection: isMobile ? "column" : "row", gap:"16px" }}>
             <div>
               <span style={S.tag(info.color)}>Our Listings</span>
-              <h2 style={{ fontSize:"clamp(1.6rem,3vw,2.2rem)", fontWeight:"800", color:T.slate, margin:"12px 0 0" }}>
+              <h2 style={{ fontSize: isMobile ? "1.4rem" : "clamp(1.6rem,3vw,2.2rem)", fontWeight:"800", color:T.slate, margin:"12px 0 0" }}>
                 {info.label} Projects
               </h2>
             </div>
-            <button style={{ ...S.btn("outline"), color:info.color, borderColor:info.color }}
+            <button style={{ ...S.btn("outline"), color:info.color, borderColor:info.color, width: isMobile ? "100%" : "auto" }}
               onClick={() => onEnquire(`${info.label} — General Enquiry`, info.label)}>
               Get a Free Consultation
             </button>
@@ -623,14 +673,14 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
             </div>
           ) : posters.length === 0 ? (
             <div style={{
-              textAlign:"center", padding:"80px 40px",
+              textAlign:"center", padding:"60px 24px",
               background:T.bg, borderRadius:"12px", border:`2px dashed ${T.line}`
             }}>
               <div style={{ fontSize:"3rem", marginBottom:"12px", opacity:.35 }}>📋</div>
               <p style={{ color:T.muted, fontSize:"15px" }}>No listings yet. Admin can add from the dashboard.</p>
             </div>
           ) : (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))", gap:"24px" }}>
+            <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill,minmax(290px,1fr))", gap:"20px" }}>
               {posters.map(p => (
                 <PosterCard key={p.id} poster={p}
                   onEnquire={() => onEnquire(`${p.title} — ${info.label}`, info.label)} />
@@ -641,27 +691,29 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
       </section>
 
       {/* CTA */}
-      <div style={{ background: info.bg, padding:"64px 48px", textAlign:"center", position:"relative", overflow:"hidden" }}>
+      <div style={{ background: info.bg, padding: isMobile ? "48px 20px" : "64px 48px", textAlign:"center", position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,0.5)" }} />
         <div style={{ position:"relative", zIndex:2, maxWidth:"600px", margin:"0 auto" }}>
-          <h2 style={{ color:"#fff", fontSize:"clamp(1.6rem,3vw,2.2rem)", fontWeight:"800", margin:"0 0 16px" }}>
+          <h2 style={{ color:"#fff", fontSize: isMobile ? "1.5rem" : "clamp(1.6rem,3vw,2.2rem)", fontWeight:"800", margin:"0 0 16px" }}>
             Ready to Get Started?
           </h2>
-          <p style={{ color:"rgba(255,255,255,0.72)", fontSize:"1rem", marginBottom:"32px" }}>
+          <p style={{ color:"rgba(255,255,255,0.72)", fontSize:"1rem", marginBottom:"28px" }}>
             Talk to our {info.label.toLowerCase()} experts today. No obligation, just honest advice.
           </p>
-          <div style={{ display:"flex", gap:"16px", justifyContent:"center", flexWrap:"wrap" }}>
-            <button style={S.btn("white")} onClick={() => onEnquire(info.cta, info.label)}>
+          <div style={{ display:"flex", gap:"12px", justifyContent:"center", flexDirection: isMobile ? "column" : "row", flexWrap:"wrap" }}>
+            <button style={{ ...S.btn("white"), width: isMobile ? "100%" : "auto" }}
+              onClick={() => onEnquire(info.cta, info.label)}>
               {info.cta}
             </button>
-            <a href={` https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`}
+            <a href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`}
               target="_blank" rel="noopener noreferrer"
               style={{
-                display:"inline-flex", alignItems:"center", gap:"8px",
+                display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px",
                 padding:"12px 24px", borderRadius:"8px",
                 background:"#25D366", color:"#fff",
                 fontFamily:font, fontWeight:"600", fontSize:"14px",
-                textDecoration:"none", border:"none"
+                textDecoration:"none", border:"none",
+                width: isMobile ? "100%" : "auto", boxSizing:"border-box"
               }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -677,6 +729,8 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
 
 /* ── Services Home Section ─────────────────────────────────────────── */
 function ServicesSection({ onEnquire, setRoute }) {
+  const isMobile = useIsMobile();
+
   const services = [
     {
       key:"real_estate", label:"Real Estate", color:T.blue, accent:"#60A5FA",
@@ -702,34 +756,34 @@ function ServicesSection({ onEnquire, setRoute }) {
   ];
 
   return (
-    <section style={{ background:T.white, padding:"80px 0" }} id="services">
-      <div style={S.section}>
-        <div style={{ textAlign:"center", marginBottom:"64px" }}>
+    <section style={{ background:T.white, padding: isMobile ? "48px 0" : "80px 0" }} id="services">
+      <div style={{ padding: isMobile ? "0 16px" : "0 48px", maxWidth:"1200px", margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom: isMobile ? "36px" : "64px" }}>
           <span style={S.tag(T.blue)}>Our Services</span>
-          <h2 style={{ fontSize:"clamp(1.8rem,4vw,2.8rem)", fontWeight:"800", color:T.slate, margin:"16px 0 12px", letterSpacing:"-0.5px" }}>
+          <h2 style={{ fontSize: isMobile ? "1.7rem" : "clamp(1.8rem,4vw,2.8rem)", fontWeight:"800", color:T.slate, margin:"16px 0 12px", letterSpacing:"-0.5px" }}>
             Three Pillars of Excellence
           </h2>
-          <p style={{ color:T.slateM, fontSize:"1.05rem", maxWidth:"480px", margin:"0 auto", lineHeight:"1.7" }}>
+          <p style={{ color:T.slateM, fontSize:"1rem", maxWidth:"480px", margin:"0 auto", lineHeight:"1.7" }}>
             From land acquisition to your dream living space — we handle every step.
           </p>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))", gap:"28px" }}>
+        <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit,minmax(320px,1fr))", gap:"20px" }}>
           {services.map(svc => (
             <div key={svc.key} style={{ ...S.card, overflow:"hidden", display:"flex", flexDirection:"column" }}>
-              <div style={{ background:svc.bg, padding:"40px 32px 32px", position:"relative", overflow:"hidden" }}>
-                <div style={{ position:"absolute", right:"-10px", top:"-10px", fontSize:"100px", opacity:0.1, userSelect:"none" }}>{svc.icon}</div>
+              <div style={{ background:svc.bg, padding: isMobile ? "28px 20px 24px" : "40px 32px 32px", position:"relative", overflow:"hidden" }}>
+                <div style={{ position:"absolute", right:"-10px", top:"-10px", fontSize:"80px", opacity:0.1, userSelect:"none" }}>{svc.icon}</div>
                 <div style={{
                   display:"inline-flex", alignItems:"center", gap:"8px",
                   background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
-                  padding:"5px 12px", borderRadius:"20px", marginBottom:"16px"
+                  padding:"5px 12px", borderRadius:"20px", marginBottom:"14px"
                 }}>
                   <span style={{ color:svc.accent, fontSize:"11px", fontWeight:"700", letterSpacing:"1.5px", textTransform:"uppercase" }}>{svc.label}</span>
                 </div>
-                <h3 style={{ color:"#fff", fontSize:"1.4rem", fontWeight:"800", margin:"0 0 12px" }}>{svc.tagline}</h3>
+                <h3 style={{ color:"#fff", fontSize: isMobile ? "1.2rem" : "1.4rem", fontWeight:"800", margin:"0 0 10px" }}>{svc.tagline}</h3>
                 <p style={{ color:"rgba(255,255,255,0.7)", fontSize:"13px", lineHeight:"1.7", margin:0 }}>{svc.desc}</p>
               </div>
-              <div style={{ padding:"24px 32px", flex:1 }}>
-                <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"24px" }}>
+              <div style={{ padding: isMobile ? "20px" : "24px 32px", flex:1 }}>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"20px" }}>
                   {svc.highlights.map(h => (
                     <span key={h} style={S.tag(svc.color)}>{h}</span>
                   ))}
@@ -757,6 +811,7 @@ function ServicesSection({ onEnquire, setRoute }) {
 
 /* ── Trust Bar ──────────────────────────────────────────────────────── */
 function TrustBar() {
+  const isMobile = useIsMobile();
   const items = [
     { icon:"🏆", label:"Trusted Agency", sub:"Serving Chennai since 2010" },
     { icon:"📍", label:"Prime Location", sub:"Porur & surrounding areas" },
@@ -764,15 +819,15 @@ function TrustBar() {
     { icon:"🔑", label:"End-to-End Support", sub:"Site visit to registration" },
   ];
   return (
-    <div style={{ background:T.blue, padding:"48px 0" }}>
-      <div style={{ ...S.section, padding:"0 48px" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:"32px" }}>
+    <div style={{ background:T.blue, padding: isMobile ? "32px 0" : "48px 0" }}>
+      <div style={{ padding: isMobile ? "0 16px" : "0 48px", maxWidth:"1200px", margin:"0 auto" }}>
+        <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fit,minmax(200px,1fr))", gap: isMobile ? "20px" : "32px" }}>
           {items.map(item=>(
-            <div key={item.label} style={{ display:"flex", alignItems:"flex-start", gap:"16px" }}>
-              <span style={{ fontSize:"2rem", lineHeight:1 }}>{item.icon}</span>
+            <div key={item.label} style={{ display:"flex", alignItems:"flex-start", gap:"12px" }}>
+              <span style={{ fontSize: isMobile ? "1.5rem" : "2rem", lineHeight:1 }}>{item.icon}</span>
               <div>
-                <div style={{ color:T.white, fontWeight:"700", fontSize:"15px" }}>{item.label}</div>
-                <div style={{ color:"rgba(255,255,255,0.65)", fontSize:"13px", marginTop:"2px" }}>{item.sub}</div>
+                <div style={{ color:T.white, fontWeight:"700", fontSize: isMobile ? "13px" : "15px" }}>{item.label}</div>
+                <div style={{ color:"rgba(255,255,255,0.65)", fontSize: isMobile ? "11px" : "13px", marginTop:"2px" }}>{item.sub}</div>
               </div>
             </div>
           ))}
@@ -784,22 +839,26 @@ function TrustBar() {
 
 /* ── CTA Strip ──────────────────────────────────────────────────────── */
 function CTAStrip({ onEnquire }) {
+  const isMobile = useIsMobile();
   return (
     <section style={{ background:"#F0F4FF", borderTop:`1px solid #D1DCF8`, borderBottom:`1px solid #D1DCF8` }}>
       <div style={{
-        ...S.section,
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-        flexWrap:"wrap", gap:"32px", padding:"48px"
+        maxWidth:"1200px", margin:"0 auto",
+        display:"flex", alignItems: isMobile ? "flex-start" : "center",
+        justifyContent:"space-between",
+        flexDirection: isMobile ? "column" : "row",
+        flexWrap:"wrap", gap:"24px",
+        padding: isMobile ? "32px 16px" : "48px"
       }}>
         <div>
-          <h3 style={{ color:T.slate, fontSize:"1.5rem", fontWeight:"800", margin:"0 0 8px" }}>
+          <h3 style={{ color:T.slate, fontSize: isMobile ? "1.2rem" : "1.5rem", fontWeight:"800", margin:"0 0 8px" }}>
             Ready to find your perfect property?
           </h3>
-          <p style={{ color:T.slateM, fontSize:"14px", margin:0 }}>
+          <p style={{ color:T.slateM, fontSize:"13px", margin:0 }}>
             Trusted deals. Transparent process. Happy buyers.
           </p>
         </div>
-        <div style={{ display:"flex", gap:"16px", flexWrap:"wrap", alignItems:"center" }}>
+        <div style={{ display:"flex", gap:"12px", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", width: isMobile ? "100%" : "auto" }}>
           <div style={{ fontSize:"13px", color:T.slateM }}>
             📧{" "}<a href="mailto:plotx.com@gmail.com" style={{ color:T.blue, textDecoration:"none", fontWeight:"600" }}>plotx.com@gmail.com</a>
           </div>
@@ -810,16 +869,17 @@ function CTAStrip({ onEnquire }) {
             <a href="tel:+919944435256" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9944435256</a>
           </div>
           <div style={{ display:"flex", gap:"10px" }}>
-            <button style={{ ...S.btn("primary"), padding:"12px 24px" }}
+            <button style={{ ...S.btn("primary"), padding:"12px 20px", flex: isMobile ? 1 : "none" }}
               onClick={()=>onEnquire("CTA Strip","General")}>Get Callback</button>
-            <a href={` https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`}
+            <a href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`}
               target="_blank" rel="noopener noreferrer"
               style={{
-                display:"inline-flex", alignItems:"center", gap:"8px",
-                padding:"12px 20px", borderRadius:"8px",
+                display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px",
+                padding:"12px 16px", borderRadius:"8px",
                 background:"#25D366", color:"#fff",
                 fontFamily:font, fontWeight:"600", fontSize:"14px",
-                textDecoration:"none", border:"none"
+                textDecoration:"none", border:"none",
+                flex: isMobile ? 1 : "none"
               }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -833,9 +893,85 @@ function CTAStrip({ onEnquire }) {
   );
 }
 
+/* ── Mobile Menu ────────────────────────────────────────────────────── */
+function MobileMenu({ open, onClose, setRoute, onEnquire, route }) {
+  if (!open) return null;
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:250,
+      background:"rgba(15,23,42,0.5)", backdropFilter:"blur(4px)"
+    }} onClick={onClose}>
+      <div style={{
+        position:"absolute", top:0, right:0, bottom:0, width:"280px",
+        background:T.white, boxShadow:"-8px 0 40px rgba(0,0,0,0.15)",
+        display:"flex", flexDirection:"column",
+        padding:"80px 24px 32px"
+      }} onClick={e=>e.stopPropagation()}>
+        <button onClick={onClose} style={{
+          position:"absolute", top:"20px", right:"20px",
+          background:"none", border:`1px solid ${T.line}`, borderRadius:"8px",
+          cursor:"pointer", color:T.slate, width:"36px", height:"36px",
+          display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px"
+        }}>×</button>
+        <div style={{ display:"flex", flexDirection:"column", gap:"4px", marginBottom:"32px" }}>
+          {[
+            { label:"Real Estate", route:"real_estate", color:T.blue },
+            { label:"Construction", route:"construction", color:T.green },
+            { label:"Interior Design", route:"interior", color:T.purple },
+          ].map(l=>(
+            <button key={l.route} onClick={()=>{ setRoute(l.route); onClose(); }}
+              style={{
+                color: route===l.route ? l.color : T.slate,
+                fontSize:"16px", fontWeight:"600", padding:"14px 16px",
+                borderRadius:"10px", border:"none", cursor:"pointer",
+                background: route===l.route ? l.color+"12" : "transparent",
+                fontFamily:font, textAlign:"left", transition:"all 0.2s",
+                display:"flex", alignItems:"center", gap:"10px"
+              }}>
+              {l.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+          <button style={{ ...S.btn("primary"), width:"100%", padding:"14px" }}
+            onClick={()=>{ onEnquire("Navbar","General"); onClose(); }}>
+            Book a Site Visit
+          </button>
+          <a href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} target="_blank" rel="noopener noreferrer"
+            style={{
+              display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
+              padding:"14px", borderRadius:"8px",
+              background:"#25D36618", border:`1.5px solid #25D36640`,
+              color:"#16A34A", fontWeight:"700", fontSize:"14px", textDecoration:"none",
+              fontFamily:font
+            }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#16A34A">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            WhatsApp Us
+          </a>
+          <button style={{ ...S.btn("outline"), width:"100%", padding:"12px", fontSize:"12px" }}
+            onClick={()=>{ setRoute("admin"); onClose(); }}>
+            Admin Portal
+          </button>
+        </div>
+        <div style={{ marginTop:"auto", paddingTop:"24px", borderTop:`1px solid ${T.line}` }}>
+          <p style={{ fontSize:"12px", color:T.muted, textAlign:"center" }}>
+            📞 <a href="tel:+919710918099" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9710918099</a>
+            {" | "}
+            <a href="tel:+919944435256" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9944435256</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Navbar ─────────────────────────────────────────────────────────── */
 function Navbar({ onEnquire, logo, setRoute, route }) {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(()=>{
     const fn = ()=>setScrolled(window.scrollY>20);
@@ -850,64 +986,97 @@ function Navbar({ onEnquire, logo, setRoute, route }) {
   ];
 
   return (
-    <nav style={{
-      ...S.nav,
-      boxShadow: scrolled?"0 4px 24px rgba(0,0,0,0.1)":"0 1px 12px rgba(0,0,0,0.06)"
-    }}>
-      <div style={{ display:"flex", alignItems:"center", gap:"12px", cursor:"pointer" }} onClick={()=>setRoute("public")}>
-        {logo
-          ? <img src={logo} alt="PlotX Logo" style={{ height:"38px", objectFit:"contain" }} />
-          : (
-            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-              <div style={{ width:"36px", height:"36px", borderRadius:"8px", background:T.blue, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:"900", fontSize:"16px" }}>P</div>
-              <div>
-                <div style={{ fontWeight:"900", fontSize:"17px", letterSpacing:"-0.3px", color:T.slate, lineHeight:1 }}>Plot X</div>
-                <div style={{ fontSize:"10px", color:T.muted, letterSpacing:"1.2px", textTransform:"uppercase" }}>Real Estate</div>
+    <>
+      <nav style={{
+        ...S.nav,
+        padding: isMobile ? "0 16px" : "0 48px",
+        boxShadow: scrolled?"0 4px 24px rgba(0,0,0,0.1)":"0 1px 12px rgba(0,0,0,0.06)"
+      }}>
+        <div style={{ display:"flex", alignItems:"center", gap:"12px", cursor:"pointer" }} onClick={()=>setRoute("public")}>
+          {logo
+            ? <img src={logo} alt="PlotX Logo" style={{ height:"36px", objectFit:"contain" }} />
+            : (
+              <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+                <div style={{ width:"36px", height:"36px", borderRadius:"8px", background:T.blue, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:"900", fontSize:"16px" }}>P</div>
+                <div>
+                  <div style={{ fontWeight:"900", fontSize:"17px", letterSpacing:"-0.3px", color:T.slate, lineHeight:1 }}>Plot X</div>
+                  <div style={{ fontSize:"10px", color:T.muted, letterSpacing:"1.2px", textTransform:"uppercase" }}>Real Estate</div>
+                </div>
               </div>
-            </div>
-          )
-        }
-      </div>
-      <div style={{ display:"flex", gap:"4px", alignItems:"center" }}>
-        {navLinks.map(l=>(
-          <button key={l.route} onClick={()=>setRoute(l.route)}
-            style={{
-              color: route===l.route ? T.blue : T.slateM,
-              fontSize:"13px", fontWeight:"600", padding:"8px 12px",
-              borderRadius:"6px", border:"none", cursor:"pointer",
-              background: route===l.route ? T.blueL : "transparent",
-              fontFamily:font, transition:"all 0.2s"
+            )
+          }
+        </div>
+
+        {isMobile ? (
+          <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+            <button style={{ ...S.btn("primary"), padding:"9px 16px", fontSize:"13px" }}
+              onClick={()=>onEnquire("Navbar","General")}>
+              Book Visit
+            </button>
+            <button onClick={()=>setMenuOpen(true)} style={{
+              background:"none", border:`1.5px solid ${T.line}`, borderRadius:"8px",
+              cursor:"pointer", padding:"8px 10px", display:"flex", alignItems:"center", justifyContent:"center"
             }}>
-            {l.label}
-          </button>
-        ))}
-        <a href={` https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} target="_blank" rel="noopener noreferrer"
-          style={{
-            display:"inline-flex", alignItems:"center", gap:"6px",
-            padding:"8px 14px", borderRadius:"8px",
-            background:"#25D36618", border:"1px solid #25D36630",
-            color:"#16A34A", fontWeight:"700", fontSize:"13px", textDecoration:"none"
-          }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="#16A34A">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-          WhatsApp
-        </a>
-        <button style={{ ...S.btn("primary"), padding:"9px 18px", fontSize:"13px" }}
-          onClick={()=>onEnquire("Navbar","General")}>
-          Book Visit
-        </button>
-        <button style={{ ...S.btn("outline"), padding:"9px 14px", fontSize:"12px" }}
-          onClick={()=>setRoute("admin")}>
-          Admin
-        </button>
-      </div>
-    </nav>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.slate} strokeWidth="2" strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div style={{ display:"flex", gap:"4px", alignItems:"center" }}>
+            {navLinks.map(l=>(
+              <button key={l.route} onClick={()=>setRoute(l.route)}
+                style={{
+                  color: route===l.route ? T.blue : T.slateM,
+                  fontSize:"13px", fontWeight:"600", padding:"8px 12px",
+                  borderRadius:"6px", border:"none", cursor:"pointer",
+                  background: route===l.route ? T.blueL : "transparent",
+                  fontFamily:font, transition:"all 0.2s"
+                }}>
+                {l.label}
+              </button>
+            ))}
+            <a href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} target="_blank" rel="noopener noreferrer"
+              style={{
+                display:"inline-flex", alignItems:"center", gap:"6px",
+                padding:"8px 14px", borderRadius:"8px",
+                background:"#25D36618", border:"1px solid #25D36630",
+                color:"#16A34A", fontWeight:"700", fontSize:"13px", textDecoration:"none"
+              }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="#16A34A">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              WhatsApp
+            </a>
+            <button style={{ ...S.btn("primary"), padding:"9px 18px", fontSize:"13px" }}
+              onClick={()=>onEnquire("Navbar","General")}>
+              Book Visit
+            </button>
+            <button style={{ ...S.btn("outline"), padding:"9px 14px", fontSize:"12px" }}
+              onClick={()=>setRoute("admin")}>
+              Admin
+            </button>
+          </div>
+        )}
+      </nav>
+
+      <MobileMenu
+        open={menuOpen}
+        onClose={()=>setMenuOpen(false)}
+        setRoute={setRoute}
+        onEnquire={onEnquire}
+        route={route}
+      />
+    </>
   );
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────── */
 function Footer({ logo, setRoute }) {
+  const isMobile = useIsMobile();
+
   const SocialIcon = ({ href, label, children, bg, hoverBg }) => {
     const [hov, setHov] = useState(false);
     return (
@@ -926,20 +1095,20 @@ function Footer({ logo, setRoute }) {
 
   return (
     <footer style={{ background:"#0F172A", color:"rgba(255,255,255,0.6)" }}>
-      <div style={{ borderBottom:"1px solid rgba(255,255,255,0.08)", padding:"28px 48px" }}>
-        <div style={{ maxWidth:"1200px", margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:"20px" }}>
+      <div style={{ borderBottom:"1px solid rgba(255,255,255,0.08)", padding: isMobile ? "20px 16px" : "28px 48px" }}>
+        <div style={{ maxWidth:"1200px", margin:"0 auto", display:"flex", alignItems: isMobile ? "flex-start" : "center", justifyContent:"space-between", flexDirection: isMobile ? "column" : "row", gap:"16px" }}>
           <div>
-            <p style={{ color:"rgba(255,255,255,0.8)", fontWeight:"700", fontSize:"15px", margin:"0 0 4px" }}>Follow us for latest listings & updates</p>
+            <p style={{ color:"rgba(255,255,255,0.8)", fontWeight:"700", fontSize: isMobile ? "14px" : "15px", margin:"0 0 4px" }}>Follow us for latest listings & updates</p>
             <p style={{ fontSize:"13px", margin:0 }}>Stay connected with Plot X on social media</p>
           </div>
-          <div style={{ display:"flex", gap:"12px", alignItems:"center" }}>
+          <div style={{ display:"flex", gap:"10px", alignItems:"center" }}>
             <SocialIcon href={FB_URL} label="Facebook" bg="rgba(24,119,242,0.15)" hoverBg="rgba(24,119,242,0.35)">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </SocialIcon>
             <SocialIcon href={IG_URL} label="Instagram" bg="rgba(225,48,108,0.15)" hoverBg="rgba(225,48,108,0.35)">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
             </SocialIcon>
-            <SocialIcon href={` https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} label="WhatsApp" bg="rgba(37,211,102,0.15)" hoverBg="rgba(37,211,102,0.35)">
+            <SocialIcon href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`} label="WhatsApp" bg="rgba(37,211,102,0.15)" hoverBg="rgba(37,211,102,0.35)">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </SocialIcon>
             <SocialIcon href={TG_URL} label="Telegram" bg="rgba(36,161,222,0.15)" hoverBg="rgba(36,161,222,0.35)">
@@ -947,18 +1116,14 @@ function Footer({ logo, setRoute }) {
                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
               </svg>
             </SocialIcon>
-            <div style={{ height:"40px", width:"1px", background:"rgba(255,255,255,0.12)" }} />
-            <div>
-              <div style={{ color:"rgba(255,255,255,0.9)", fontSize:"13px", fontWeight:"700" }}>Follow @plotxchennai</div>
-              <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.4)", marginTop:"2px" }}>FB, Instagram & Telegram</div>
-            </div>
           </div>
         </div>
       </div>
-      <div style={{ padding:"56px 48px 32px" }}>
+
+      <div style={{ padding: isMobile ? "36px 16px 28px" : "56px 48px 32px" }}>
         <div style={{ maxWidth:"1200px", margin:"0 auto" }}>
-          <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr", gap:"40px", marginBottom:"48px" }}>
-            <div>
+          <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1fr 1fr 1fr", gap: isMobile ? "32px 20px" : "40px", marginBottom: isMobile ? "32px" : "48px" }}>
+            <div style={{ gridColumn: isMobile ? "1 / -1" : "auto" }}>
               <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"16px", cursor:"pointer" }} onClick={() => setRoute("public")}>
                 {logo
                   ? <img src={logo} alt="PlotX" style={{ height:"36px", objectFit:"contain" }} />
@@ -973,7 +1138,7 @@ function Footer({ logo, setRoute }) {
               <p style={{ fontSize:"13px", lineHeight:"1.7", maxWidth:"260px", margin:"0 0 20px" }}>
                 Trusted property experts in Chennai. Your dream property is just one conversation away.
               </p>
-              <div style={{ display:"flex", gap:"10px" }}>
+              <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
                 {[WA_NUMBER, WA_NUMBER2].map((num,i)=>(
                   <a key={i} href={`https://wa.me/${num}`} target="_blank" rel="noopener noreferrer"
                     style={{
@@ -993,20 +1158,18 @@ function Footer({ logo, setRoute }) {
                 {l:"Real Estate",r:"real_estate"},{l:"Construction",r:"construction"},
                 {l:"Interior Design",r:"interior"},{l:"Site Visits",r:"public"}
               ]},
-              { title:"Company", links:[
-                {l:"About Us",r:null},{l:"Our Projects",r:null},
-                {l:"Testimonials",r:null},{l:"Contact",r:null}
+              { title:"Contact", links:[
+                {l:"📍 Porur, Chennai",r:null},{l:"📞 9710918099",r:null},
+                {l:"📞 9944435256",r:null},{l:"📧 plotx.com@gmail.com",r:null}
               ]},
             ].map(col=>(
               <div key={col.title}>
-                <h4 style={{ color:"#fff",fontWeight:"700",fontSize:"13px",letterSpacing:"0.5px",marginBottom:"16px",textTransform:"uppercase" }}>{col.title}</h4>
+                <h4 style={{ color:"#fff",fontWeight:"700",fontSize:"12px",letterSpacing:"0.5px",marginBottom:"14px",textTransform:"uppercase" }}>{col.title}</h4>
                 {col.links.map(item=>(
                   <div key={item.l} style={{ fontSize:"13px",marginBottom:"10px",lineHeight:"1.5" }}>
                     {item.r ? (
-                      <span style={{ cursor:"pointer",color:"rgba(255,255,255,0.6)",transition:"color 0.2s" }}
-                        onClick={()=>setRoute(item.r)}
-                        onMouseEnter={e=>e.target.style.color="#fff"}
-                        onMouseLeave={e=>e.target.style.color="rgba(255,255,255,0.6)"}>
+                      <span style={{ cursor:"pointer",color:"rgba(255,255,255,0.6)" }}
+                        onClick={()=>setRoute(item.r)}>
                         {item.l}
                       </span>
                     ) : item.l}
@@ -1014,33 +1177,8 @@ function Footer({ logo, setRoute }) {
                 ))}
               </div>
             ))}
-            <div>
-              <h4 style={{ color:"#fff",fontWeight:"700",fontSize:"13px",letterSpacing:"0.5px",marginBottom:"16px",textTransform:"uppercase" }}>Contact</h4>
-              {["📍 Porur, Chennai","📞 9710918099","📞 9944435256","📧 plotx.com@gmail.com","✈️ t.me/plotx7743"].map(l=>(
-                <div key={l} style={{ fontSize:"13px",marginBottom:"10px",lineHeight:"1.5" }}>{l}</div>
-              ))}
-              <div style={{ marginTop:"20px" }}>
-                <div style={{ fontSize:"11px",fontWeight:"700",letterSpacing:"1px",textTransform:"uppercase",color:"rgba(255,255,255,0.4)",marginBottom:"12px" }}>Follow Us</div>
-                <div style={{ display:"flex",gap:"8px" }}>
-                  <a href={FB_URL} target="_blank" rel="noopener noreferrer"
-                    style={{ display:"flex",alignItems:"center",justifyContent:"center",width:"36px",height:"36px",borderRadius:"8px",background:"rgba(24,119,242,0.2)",border:"1px solid rgba(24,119,242,0.3)",textDecoration:"none" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  </a>
-                  <a href={IG_URL} target="_blank" rel="noopener noreferrer"
-                    style={{ display:"flex",alignItems:"center",justifyContent:"center",width:"36px",height:"36px",borderRadius:"8px",background:"rgba(225,48,108,0.2)",border:"1px solid rgba(225,48,108,0.3)",textDecoration:"none" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                  </a>
-                  <a href={TG_URL} target="_blank" rel="noopener noreferrer"
-                    style={{ display:"flex",alignItems:"center",justifyContent:"center",width:"36px",height:"36px",borderRadius:"8px",background:"rgba(36,161,222,0.2)",border:"1px solid rgba(36,161,222,0.3)",textDecoration:"none" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#24A1DE">
-                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
           </div>
-          <div style={{ borderTop:"1px solid rgba(255,255,255,0.1)",paddingTop:"24px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"16px" }}>
+          <div style={{ borderTop:"1px solid rgba(255,255,255,0.1)",paddingTop:"24px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"12px" }}>
             <span style={{ fontSize:"12px" }}>© 2025 Plot X. A Real Estate Agency — Porur, Chennai, India.</span>
             <span style={{ fontSize:"12px" }}>Trusted Property Experts Since 2010</span>
           </div>
@@ -1053,16 +1191,16 @@ function Footer({ logo, setRoute }) {
 /* ── WhatsApp Floating Button ─────────────────────────────────────── */
 function WAFloat() {
   return (
-    <a href={` https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`}
+    <a href={`https://chat.whatsapp.com/H1tWAM25JiN9kvaZ1eX3RJ`}
       target="_blank" rel="noopener noreferrer"
       style={{
-        position:"fixed", bottom:"28px", right:"28px", zIndex:500,
-        width:"56px", height:"56px", borderRadius:"50%",
+        position:"fixed", bottom:"24px", right:"20px", zIndex:500,
+        width:"52px", height:"52px", borderRadius:"50%",
         background:"#25D366", display:"flex", alignItems:"center", justifyContent:"center",
         boxShadow:"0 4px 20px rgba(37,211,102,0.5)", textDecoration:"none",
         animation:"waPulse 2s infinite"
       }}>
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
       </svg>
       <style>{`@keyframes waPulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.5)}50%{box-shadow:0 4px 32px rgba(37,211,102,0.8)}}`}</style>
@@ -1093,10 +1231,10 @@ function AdminLogin({ onLogin }) {
   };
 
   return (
-    <div style={{ ...S.page, display:"flex", alignItems:"center", justifyContent:"center", minHeight:"100vh" }}>
+    <div style={{ ...S.page, display:"flex", alignItems:"center", justifyContent:"center", minHeight:"100vh", padding:"20px" }}>
       <div style={{ background:T.white, borderRadius:"16px", border:`1px solid ${T.line}`,
-        padding:"48px", width:"100%", maxWidth:"420px", boxShadow:"0 24px 64px rgba(0,0,0,0.1)" }}>
-        <div style={{ textAlign:"center", marginBottom:"32px" }}>
+        padding:"40px 28px", width:"100%", maxWidth:"420px", boxShadow:"0 24px 64px rgba(0,0,0,0.1)" }}>
+        <div style={{ textAlign:"center", marginBottom:"28px" }}>
           <div style={{ width:"52px",height:"52px",borderRadius:"12px",background:T.blue,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",color:"#fff",fontWeight:"900",fontSize:"22px" }}>P</div>
           <h2 style={{ color:T.slate, fontSize:"1.5rem", fontWeight:"800", margin:"0 0 4px" }}>Admin Portal</h2>
           <p style={{ color:T.muted, fontSize:"14px" }}>Plot X Dashboard</p>
@@ -1104,7 +1242,7 @@ function AdminLogin({ onLogin }) {
         {["username","password"].map(f=>(
           <div key={f} style={{ marginBottom:"16px" }}>
             <label style={S.label}>{f}</label>
-            <input style={S.input} type={f==="password"?"password":"text"}
+            <input style={{ ...S.input, fontSize:"16px" }} type={f==="password"?"password":"text"}
               value={creds[f]} onChange={e=>setCreds({...creds,[f]:e.target.value})}
               onKeyDown={e=>e.key==="Enter"&&login()}
               onFocus={e=>e.target.style.borderColor=T.blue}
@@ -1113,10 +1251,9 @@ function AdminLogin({ onLogin }) {
           </div>
         ))}
         {err && <p style={{ color:T.red,fontSize:"13px",marginBottom:"12px",padding:"10px 14px",background:"#FEF2F2",borderRadius:"6px" }}>{err}</p>}
-        <button style={{ ...S.btn("primary"),width:"100%",padding:"14px" }} onClick={login} disabled={loading}>
+        <button style={{ ...S.btn("primary"),width:"100%",padding:"14px",fontSize:"16px" }} onClick={login} disabled={loading}>
           {loading?"Signing in…":"Sign In"}
         </button>
-        <p style={{ color:T.muted,fontSize:"11px",marginTop:"16px",textAlign:"center" }}>Welcome to the Admin Portal</p>
       </div>
     </div>
   );
@@ -1130,11 +1267,12 @@ function AdminDashboard({ onLogout }) {
   const [upload, setUpload] = useState({ title:"", description:"", category:"real_estate", file:null, preview:null });
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
-  const [msgType, setMsgType] = useState("success"); // "success" | "error"
+  const [msgType, setMsgType] = useState("success");
   const [loadingLeads, setLoadingLeads] = useState(false);
   const [loadingPosters, setLoadingPosters] = useState(false);
   const [logo, setLogo] = useState(()=>localStorage.getItem("plotx_logo")||null);
   const [logoPreview, setLogoPreview] = useState(()=>localStorage.getItem("plotx_logo")||null);
+  const isMobile = useIsMobile();
 
   const showMsg = (text, type="success") => {
     setMsg(text); setMsgType(type);
@@ -1174,7 +1312,6 @@ function AdminDashboard({ onLogout }) {
     const file = e.target.files[0];
     if (!file) return;
     setUpload(u => ({ ...u, file }));
-    // Preview
     const reader = new FileReader();
     reader.onload = ev => setUpload(u => ({ ...u, preview: ev.target.result }));
     reader.readAsDataURL(file);
@@ -1204,9 +1341,7 @@ function AdminDashboard({ onLogout }) {
       formData.append("title", upload.title);
       formData.append("description", upload.description || "");
       formData.append("category", upload.category);
-      if (upload.file) {
-        formData.append("image", upload.file);
-      }
+      if (upload.file) formData.append("image", upload.file);
       await apiFetch("/admin/posters", { method:"POST", body: formData });
       showMsg("✓ Poster uploaded successfully");
       setUpload({ title:"", description:"", category:"real_estate", file:null, preview:null });
@@ -1245,41 +1380,41 @@ function AdminDashboard({ onLogout }) {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
 
+  const tabs = [["leads","Leads"],["content","Content"],["upload","Upload"],["settings","Settings"]];
+
   return (
     <div style={S.page}>
-      <div style={{ ...S.nav }}>
+      <div style={{ ...S.nav, padding: isMobile ? "0 12px" : "0 48px" }}>
         <div style={{ display:"flex",alignItems:"center",gap:"10px" }}>
           <div style={{ width:"32px",height:"32px",borderRadius:"8px",background:T.blue,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:"900",fontSize:"14px" }}>P</div>
-          <span style={{ fontWeight:"800",color:T.slate,fontSize:"15px" }}>Plot X</span>
+          {!isMobile && <span style={{ fontWeight:"800",color:T.slate,fontSize:"15px" }}>Plot X</span>}
           <span style={S.tag(T.blue)}>Admin</span>
         </div>
-        <div style={{ display:"flex",gap:"6px" }}>
-          {[["leads","Leads"],["content","Content"],["upload","Upload"],["settings","Settings"]].map(([k,l])=>(
+        <div style={{ display:"flex",gap: isMobile ? "4px" : "6px", overflowX:"auto" }}>
+          {tabs.map(([k,l])=>(
             <button key={k} onClick={()=>setTab(k)}
-              style={{ ...S.btn(tab===k?"primary":"outline"), padding:"8px 16px", fontSize:"12px" }}>{l}</button>
+              style={{ ...S.btn(tab===k?"primary":"outline"), padding: isMobile ? "8px 10px" : "8px 16px", fontSize: isMobile ? "11px" : "12px", whiteSpace:"nowrap" }}>{l}</button>
           ))}
-          <button style={{ padding:"8px 16px",fontSize:"12px",border:`1.5px solid ${T.line}`,
-            borderRadius:"8px",background:"transparent",color:T.red,cursor:"pointer",fontFamily:font,fontWeight:"600" }}
-            onClick={logout}>Logout</button>
+          <button style={{ padding: isMobile ? "8px 10px" : "8px 16px", fontSize: isMobile ? "11px" : "12px", border:`1.5px solid ${T.line}`,
+            borderRadius:"8px",background:"transparent",color:T.red,cursor:"pointer",fontFamily:font,fontWeight:"600", whiteSpace:"nowrap" }}
+            onClick={logout}>{isMobile ? "Exit" : "Logout"}</button>
         </div>
       </div>
 
       <div style={{ paddingTop:"80px" }}>
-        <div style={{ background:T.white,borderBottom:`1px solid ${T.line}`,padding:"24px 48px" }}>
-          <div style={{ display:"flex",gap:"20px",maxWidth:"1200px",margin:"0 auto" }}>
+        <div style={{ background:T.white,borderBottom:`1px solid ${T.line}`,padding: isMobile ? "16px" : "24px 48px" }}>
+          <div style={{ display:"flex",gap:"12px",maxWidth:"1200px",margin:"0 auto", overflowX:"auto" }}>
             {[["Total Leads",leads.length,T.blue],["Posters",posters.length,T.green],["This Month",monthLeads,T.purple]].map(([l,v,c])=>(
               <div key={l} style={{ background:T.bg,border:`1px solid ${c}22`,
-                borderLeft:`4px solid ${c}`,padding:"16px 24px",borderRadius:"8px" }}>
-                <div style={{ fontSize:"11px",letterSpacing:"1px",color:T.muted,textTransform:"uppercase",marginBottom:"6px" }}>{l}</div>
-                <div style={{ fontSize:"2rem",fontWeight:"800",color:c }}>{v}</div>
+                borderLeft:`4px solid ${c}`,padding: isMobile ? "12px 16px" : "16px 24px",borderRadius:"8px", minWidth: isMobile ? "110px" : "auto" }}>
+                <div style={{ fontSize:"10px",letterSpacing:"1px",color:T.muted,textTransform:"uppercase",marginBottom:"4px" }}>{l}</div>
+                <div style={{ fontSize: isMobile ? "1.6rem" : "2rem",fontWeight:"800",color:c }}>{v}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={S.section}>
-
-          {/* Global message bar */}
+        <div style={{ padding: isMobile ? "20px 16px" : "88px 48px", maxWidth:"1200px", margin:"0 auto" }}>
           {msg && (
             <div style={{
               padding:"12px 16px", borderRadius:"8px", marginBottom:"20px", fontWeight:"600", fontSize:"13px",
@@ -1289,17 +1424,32 @@ function AdminDashboard({ onLogout }) {
             }}>{msg}</div>
           )}
 
-          {/* Leads Tab */}
           {tab==="leads" && (
             <div>
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"24px" }}>
-                <h2 style={{ color:T.slate,fontWeight:"800",fontSize:"1.6rem",margin:0 }}>Customer Leads</h2>
-                <button onClick={fetchLeads} style={{ ...S.btn("outline"), padding:"8px 16px", fontSize:"12px" }}>
-                  ↻ Refresh
-                </button>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"20px" }}>
+                <h2 style={{ color:T.slate,fontWeight:"800",fontSize: isMobile ? "1.3rem" : "1.6rem",margin:0 }}>Customer Leads</h2>
+                <button onClick={fetchLeads} style={{ ...S.btn("outline"), padding:"8px 14px", fontSize:"12px" }}>↻ Refresh</button>
               </div>
               {loadingLeads ? (
                 <p style={{ color:T.muted, padding:"40px", textAlign:"center" }}>Loading leads…</p>
+              ) : isMobile ? (
+                /* Mobile lead cards */
+                <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
+                  {leads.map(l=>(
+                    <div key={l.id} style={{ ...S.card, padding:"16px" }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"10px" }}>
+                        <div>
+                          <p style={{ fontWeight:"700", color:T.slate, margin:"0 0 2px", fontSize:"15px" }}>{l.name}</p>
+                          <a href={`tel:+91${l.mobile}`} style={{ color:T.blue, fontWeight:"600", textDecoration:"none", fontSize:"14px" }}>{l.mobile}</a>
+                        </div>
+                        <span style={S.tag(catMeta[l.service?.toLowerCase().replace(/ /g,"_")]?.color||T.blue)}>{l.service||"—"}</span>
+                      </div>
+                      <p style={{ color:T.muted, fontSize:"12px", margin:"0 0 6px" }}>{l.email}</p>
+                      <p style={{ color:T.muted, fontSize:"11px", margin:0 }}>{l.source_context||"—"} · {new Date(l.created_at).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                  {leads.length===0 && <p style={{ color:T.muted, textAlign:"center", padding:"40px" }}>No leads yet.</p>}
+                </div>
               ) : (
                 <div style={{ background:T.white,borderRadius:"12px",border:`1px solid ${T.line}`,overflow:"hidden" }}>
                   <div style={{ overflowX:"auto" }}>
@@ -1337,28 +1487,25 @@ function AdminDashboard({ onLogout }) {
             </div>
           )}
 
-          {/* Content Tab */}
           {tab==="content" && (
             <div>
-              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"24px" }}>
-                <h2 style={{ color:T.slate,fontWeight:"800",fontSize:"1.6rem",margin:0 }}>Manage Posters</h2>
-                <button onClick={fetchPosters} style={{ ...S.btn("outline"), padding:"8px 16px", fontSize:"12px" }}>
-                  ↻ Refresh
-                </button>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"20px" }}>
+                <h2 style={{ color:T.slate,fontWeight:"800",fontSize: isMobile ? "1.3rem" : "1.6rem",margin:0 }}>Manage Posters</h2>
+                <button onClick={fetchPosters} style={{ ...S.btn("outline"), padding:"8px 14px", fontSize:"12px" }}>↻ Refresh</button>
               </div>
               {loadingPosters ? (
                 <p style={{ color:T.muted, padding:"40px", textAlign:"center" }}>Loading posters…</p>
               ) : (
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"20px" }}>
+                <div style={{ display:"grid",gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill,minmax(260px,1fr))",gap:"16px" }}>
                   {posters.map(p=>(
-                    <div key={p.id} style={{ ...S.card,padding:"16px" }}>
+                    <div key={p.id} style={{ ...S.card,padding:"12px" }}>
                       {p.image_path && (
                         <img src={`${BASE_URL}${p.image_path}`} alt={p.title}
-                          style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:"8px",marginBottom:"12px",display:"block" }}/>
+                          style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:"8px",marginBottom:"10px",display:"block" }}/>
                       )}
                       <span style={S.tag(catMeta[p.category]?.color||T.blue)}>{catMeta[p.category]?.label}</span>
-                      <h3 style={{ color:T.slate,fontSize:"14px",fontWeight:"700",margin:"8px 0 6px" }}>{p.title}</h3>
-                      <p style={{ color:T.muted,fontSize:"12px",marginBottom:"12px" }}>{p.description}</p>
+                      <h3 style={{ color:T.slate,fontSize:"13px",fontWeight:"700",margin:"8px 0 4px" }}>{p.title}</h3>
+                      <p style={{ color:T.muted,fontSize:"11px",marginBottom:"10px" }}>{p.description}</p>
                       <button onClick={()=>deletePoster(p.id)}
                         style={{ ...S.btn("outline"),width:"100%",padding:"8px",color:T.red,borderColor:T.red,fontSize:"12px" }}>
                         Delete
@@ -1371,33 +1518,30 @@ function AdminDashboard({ onLogout }) {
             </div>
           )}
 
-          {/* Upload Tab */}
           {tab==="upload" && (
             <div style={{ maxWidth:"560px" }}>
-              <h2 style={{ color:T.slate,fontWeight:"800",fontSize:"1.6rem",marginBottom:"8px" }}>Upload Poster</h2>
-              <p style={{ color:T.muted,marginBottom:"32px" }}>Add new property listings. Images are saved to the server and appear on the website instantly.</p>
-
+              <h2 style={{ color:T.slate,fontWeight:"800",fontSize: isMobile ? "1.3rem" : "1.6rem",marginBottom:"8px" }}>Upload Poster</h2>
+              <p style={{ color:T.muted,marginBottom:"24px",fontSize:"14px" }}>Add new property listings. Images appear on the website instantly.</p>
               {upload.preview && (
-                <div style={{ marginBottom:"20px",borderRadius:"10px",overflow:"hidden",border:`1px solid ${T.line}` }}>
+                <div style={{ marginBottom:"16px",borderRadius:"10px",overflow:"hidden",border:`1px solid ${T.line}` }}>
                   <img src={upload.preview} alt="Preview"
                     style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",display:"block" }}/>
                   <div style={{ padding:"8px 12px",background:T.bg,fontSize:"12px",color:T.muted }}>
-                    ✓ Image selected — will be uploaded to the server
+                    ✓ Image selected
                   </div>
                 </div>
               )}
-
               {[{f:"title",label:"Title *",ph:"e.g. Premium Villa in Porur"},{f:"description",label:"Description",area:true,ph:"Brief description…"}].map(({f,label,ph,area})=>(
                 <div key={f} style={{ marginBottom:"16px" }}>
                   <label style={S.label}>{label}</label>
                   {area
-                    ? <textarea style={{ ...S.input,height:"80px",resize:"vertical" }} value={upload[f]} placeholder={ph} onChange={e=>setUpload({...upload,[f]:e.target.value})} />
-                    : <input style={S.input} value={upload[f]} placeholder={ph} onChange={e=>setUpload({...upload,[f]:e.target.value})} />}
+                    ? <textarea style={{ ...S.input,height:"80px",resize:"vertical",fontSize:"16px" }} value={upload[f]} placeholder={ph} onChange={e=>setUpload({...upload,[f]:e.target.value})} />
+                    : <input style={{ ...S.input,fontSize:"16px" }} value={upload[f]} placeholder={ph} onChange={e=>setUpload({...upload,[f]:e.target.value})} />}
                 </div>
               ))}
               <div style={{ marginBottom:"16px" }}>
                 <label style={S.label}>Category *</label>
-                <select style={S.input} value={upload.category} onChange={e=>setUpload({...upload,category:e.target.value})}>
+                <select style={{ ...S.input,fontSize:"16px" }} value={upload.category} onChange={e=>setUpload({...upload,category:e.target.value})}>
                   <option value="real_estate">Real Estate</option>
                   <option value="construction">Construction</option>
                   <option value="interior">Interior Design</option>
@@ -1406,23 +1550,19 @@ function AdminDashboard({ onLogout }) {
               <div style={{ marginBottom:"24px" }}>
                 <label style={S.label}>Image</label>
                 <input type="file" accept="image/*" onChange={handleFileChange}
-                  style={{ ...S.input,padding:"8px",cursor:"pointer" }} />
-                <p style={{ color:T.muted,fontSize:"11px",marginTop:"6px" }}>
-                  Uploaded to <code>Flask /uploads</code> folder and served at <code>{BASE_URL}/uploads/filename</code>.
-                </p>
+                  style={{ ...S.input,padding:"8px",cursor:"pointer",fontSize:"14px" }} />
               </div>
-              <button style={{ ...S.btn("primary"),width:"100%",padding:"14px" }} onClick={uploadPoster} disabled={uploading}>
+              <button style={{ ...S.btn("primary"),width:"100%",padding:"14px",fontSize:"16px" }} onClick={uploadPoster} disabled={uploading}>
                 {uploading ? "Uploading…" : "Upload Poster"}
               </button>
             </div>
           )}
 
-          {/* Settings Tab */}
           {tab==="settings" && (
             <div style={{ maxWidth:"560px" }}>
-              <h2 style={{ color:T.slate,fontWeight:"800",fontSize:"1.6rem",marginBottom:"8px" }}>Settings</h2>
-              <p style={{ color:T.muted,marginBottom:"32px" }}>Customise your website branding.</p>
-              <div style={{ background:T.white,borderRadius:"12px",border:`1px solid ${T.line}`,padding:"28px",marginBottom:"24px" }}>
+              <h2 style={{ color:T.slate,fontWeight:"800",fontSize: isMobile ? "1.3rem" : "1.6rem",marginBottom:"8px" }}>Settings</h2>
+              <p style={{ color:T.muted,marginBottom:"24px",fontSize:"14px" }}>Customise your website branding.</p>
+              <div style={{ background:T.white,borderRadius:"12px",border:`1px solid ${T.line}`,padding:"24px",marginBottom:"20px" }}>
                 <h3 style={{ color:T.slate,fontSize:"15px",fontWeight:"700",margin:"0 0 16px" }}>Company Logo</h3>
                 {logoPreview && (
                   <div style={{ marginBottom:"16px",padding:"16px",background:T.bg,borderRadius:"8px",textAlign:"center" }}>
@@ -1431,20 +1571,16 @@ function AdminDashboard({ onLogout }) {
                 )}
                 <label style={S.label}>Upload Logo Image</label>
                 <input type="file" accept="image/*" onChange={handleLogoChange}
-                  style={{ ...S.input,padding:"8px",cursor:"pointer" }} />
-                <p style={{ color:T.muted,fontSize:"12px",marginTop:"8px" }}>
-                  Stored in browser localStorage (no backend endpoint needed).
-                </p>
+                  style={{ ...S.input,padding:"8px",cursor:"pointer",fontSize:"14px" }} />
               </div>
               <div style={{ background:"#F0FDF4",border:`1px solid #86EFAC`,borderRadius:"12px",padding:"20px" }}>
                 <p style={{ color:"#14532D",fontSize:"13px",fontWeight:"600",margin:"0 0 6px" }}>✓ API Connected</p>
                 <p style={{ color:"#166534",fontSize:"13px",margin:0,lineHeight:"1.6" }}>
-                  All leads and posters are stored in MySQL via your Flask backend at <code>{API}</code>. Logo is still stored locally in the browser.
+                  All leads and posters are stored via your Flask backend at <code>{API}</code>.
                 </p>
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>
