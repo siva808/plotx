@@ -737,21 +737,36 @@ function ServicesSection({ onEnquire, setRoute }) {
       bg:"linear-gradient(135deg,#0f172a,#1e3a5f)", icon:"🏠",
       tagline:"Own Your Dream Property",
       desc:"Premium plots, villas & commercial spaces in Chennai's most sought-after locations.",
-      highlights:["Residential Plots","Independent Villas","Commercial Spaces","Agricultural Land"],
+      highlights:[
+        { label:"Residential Plots", icon:"🏡" },
+        { label:"Independent Villas", icon:"🏘️" },
+        { label:"Commercial Spaces", icon:"🏢" },
+        { label:"Agricultural Land", icon:"🌾" },
+      ],
     },
     {
       key:"construction", label:"Construction", color:T.green, accent:"#34D399",
       bg:"linear-gradient(135deg,#0d2414,#1a4a2e)", icon:"🏗️",
       tagline:"Build With Precision",
       desc:"End-to-end construction from architectural planning to turnkey delivery, crafted for excellence.",
-      highlights:["Architectural Design","Structural Work","Turnkey Projects","Renovations"],
+      highlights:[
+        { label:"Home Construction", icon:"🏠" },
+        { label:"Architectural Design", icon:"📐" },
+        { label:"Renovations", icon:"🔨" },
+        { label:"Commercial Build", icon:"🏬" },
+      ],
     },
     {
       key:"interior", label:"Interior Design", color:T.purple, accent:"#C084FC",
       bg:"linear-gradient(135deg,#1a0a2e,#3d1a6e)", icon:"🛋️",
       tagline:"Transform Your Space",
       desc:"Luxury modular interiors crafted to your personality — spaces you'll love every day.",
-      highlights:["Modular Kitchen","Living Room","Full Home Interiors","Commercial Interiors"],
+      highlights:[
+        { label:"Modular Kitchen", icon:"🍳" },
+        { label:"Living Room", icon:"🛋️" },
+        { label:"Bedroom Interiors", icon:"🛏️" },
+        { label:"Commercial Interiors", icon:"🏢" },
+      ],
     },
   ];
 
@@ -767,41 +782,16 @@ function ServicesSection({ onEnquire, setRoute }) {
             From land acquisition to your dream living space — we handle every step.
           </p>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit,minmax(320px,1fr))", gap:"20px" }}>
+
+        <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit,minmax(320px,1fr))", gap:"24px" }}>
           {services.map(svc => (
-            <div key={svc.key} style={{ ...S.card, overflow:"hidden", display:"flex", flexDirection:"column" }}>
-              <div style={{ background:svc.bg, padding: isMobile ? "28px 20px 24px" : "40px 32px 32px", position:"relative", overflow:"hidden" }}>
-                <div style={{ position:"absolute", right:"-10px", top:"-10px", fontSize:"80px", opacity:0.1, userSelect:"none" }}>{svc.icon}</div>
-                <div style={{
-                  display:"inline-flex", alignItems:"center", gap:"8px",
-                  background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
-                  padding:"5px 12px", borderRadius:"20px", marginBottom:"14px"
-                }}>
-                  <span style={{ color:svc.accent, fontSize:"11px", fontWeight:"700", letterSpacing:"1.5px", textTransform:"uppercase" }}>{svc.label}</span>
-                </div>
-                <h3 style={{ color:"#fff", fontSize: isMobile ? "1.2rem" : "1.4rem", fontWeight:"800", margin:"0 0 10px" }}>{svc.tagline}</h3>
-                <p style={{ color:"rgba(255,255,255,0.7)", fontSize:"13px", lineHeight:"1.7", margin:0 }}>{svc.desc}</p>
-              </div>
-              <div style={{ padding: isMobile ? "20px" : "24px 32px", flex:1 }}>
-                <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"20px" }}>
-                  {svc.highlights.map(h => (
-                    <span key={h} style={S.tag(svc.color)}>{h}</span>
-                  ))}
-                </div>
-                <div style={{ display:"flex", gap:"10px" }}>
-                  <button style={{ ...S.btn("primary"), flex:1, padding:"11px 16px", fontSize:"13px",
-                    background:svc.color, boxShadow:`0 2px 12px ${svc.color}44` }}
-                    onClick={() => setRoute(svc.key)}>
-                    Explore {svc.label} →
-                  </button>
-                  <button style={{ ...S.btn("outline"), padding:"11px 16px", fontSize:"13px",
-                    color:svc.color, borderColor:svc.color }}
-                    onClick={() => onEnquire(`${svc.label} — Service Enquiry`, svc.label)}>
-                    Enquire
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ServiceCard
+              key={svc.key}
+              svc={svc}
+              onEnquire={onEnquire}
+              setRoute={setRoute}
+              isMobile={isMobile}
+            />
           ))}
         </div>
       </div>
@@ -809,6 +799,105 @@ function ServicesSection({ onEnquire, setRoute }) {
   );
 }
 
+function ServiceCard({ svc, onEnquire, setRoute, isMobile }) {
+  const [hovCard, setHovCard] = useState(false);
+  const [hovBtn, setHovBtn] = useState(null);
+
+  return (
+    <div
+      style={{
+        ...S.card, overflow:"hidden", display:"flex", flexDirection:"column",
+        transform: hovCard ? "translateY(-6px)" : "none",
+        boxShadow: hovCard ? `0 16px 48px ${svc.color}22` : "0 2px 12px rgba(0,0,0,0.06)",
+        border: hovCard ? `1.5px solid ${svc.color}44` : `1px solid ${T.line}`,
+        transition:"all 0.25s",
+      }}
+      onMouseEnter={() => setHovCard(true)}
+      onMouseLeave={() => setHovCard(false)}
+    >
+      {/* Dark header */}
+      <div style={{
+        background: svc.bg,
+        padding: isMobile ? "28px 20px 24px" : "36px 28px 28px",
+        position:"relative", overflow:"hidden"
+      }}>
+        <div style={{
+          position:"absolute", right:"-10px", top:"-10px",
+          fontSize:"80px", opacity:0.1, userSelect:"none"
+        }}>{svc.icon}</div>
+
+        <div style={{
+          display:"inline-flex", alignItems:"center", gap:"8px",
+          background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)",
+          padding:"5px 12px", borderRadius:"20px", marginBottom:"14px"
+        }}>
+          <span style={{ color:svc.accent, fontSize:"11px", fontWeight:"700", letterSpacing:"1.5px", textTransform:"uppercase" }}>{svc.label}</span>
+        </div>
+
+        <h3 style={{ color:"#fff", fontSize: isMobile ? "1.2rem" : "1.35rem", fontWeight:"800", margin:"0 0 8px" }}>
+          {svc.tagline}
+        </h3>
+        <p style={{ color:"rgba(255,255,255,0.65)", fontSize:"13px", lineHeight:"1.7", margin:0 }}>
+          {svc.desc}
+        </p>
+      </div>
+
+      {/* Highlight buttons */}
+      <div style={{ padding: isMobile ? "20px" : "24px 28px", flex:1, display:"flex", flexDirection:"column", gap:"16px" }}>
+        <p style={{
+          fontSize:"11px", fontWeight:"700", letterSpacing:"1.2px",
+          textTransform:"uppercase", color:T.muted, margin:0
+        }}>Select a Service</p>
+
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
+          {svc.highlights.map((h) => {
+            const isHov = hovBtn === h.label;
+            return (
+              <button
+                key={h.label}
+                onMouseEnter={() => setHovBtn(h.label)}
+                onMouseLeave={() => setHovBtn(null)}
+                onClick={() => {
+                  setRoute(svc.key);
+                  setTimeout(() => onEnquire(`${h.label} — ${svc.label}`, svc.label), 300);
+                }}
+                style={{
+                  display:"flex", alignItems:"center", gap:"7px",
+                  padding: isMobile ? "9px 10px" : "10px 12px",
+                  borderRadius:"9px", cursor:"pointer", fontFamily:font,
+                  fontSize: isMobile ? "11px" : "12px", fontWeight:"600",
+                  textAlign:"left", transition:"all 0.18s",
+                  border: isHov ? `1.5px solid ${svc.color}` : `1.5px solid ${T.line}`,
+                  background: isHov ? svc.color+"10" : T.bg,
+                  color: isHov ? svc.color : T.slateM,
+                  transform: isHov ? "scale(1.03)" : "scale(1)",
+                  boxShadow: isHov ? `0 4px 14px ${svc.color}22` : "none",
+                }}
+              >
+                <span style={{ fontSize:"15px", lineHeight:1 }}>{h.icon}</span>
+                <span style={{ lineHeight:"1.3" }}>{h.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Explore button */}
+        <button
+          style={{
+            ...S.btn("primary"), width:"100%", padding:"11px 16px", fontSize:"13px",
+            background: svc.color, boxShadow:`0 2px 12px ${svc.color}44`,
+            display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
+            marginTop:"4px"
+          }}
+          onClick={() => setRoute(svc.key)}
+        >
+          Explore All {svc.label}
+          <span style={{ fontSize:"16px" }}>→</span>
+        </button>
+      </div>
+    </div>
+  );
+}
 /* ── Trust Bar ──────────────────────────────────────────────────────── */
 function TrustBar() {
   const isMobile = useIsMobile();
@@ -1116,6 +1205,11 @@ function Footer({ logo, setRoute }) {
                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
               </svg>
             </SocialIcon>
+            <SocialIcon href="https://www.linkedin.com/in/plotx-realty" label="LinkedIn" bg="rgba(10,102,194,0.15)" hoverBg="rgba(10,102,194,0.35)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          </SocialIcon>
           </div>
         </div>
       </div>
