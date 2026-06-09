@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 const WA_NUMBER = "919710918099";
-const WA_NUMBER2 = "919944435256";
+const WA_NUMBER2 = "919944352567";
 const FB_URL = "https://facebook.com/plotxchennai";
 const IG_URL = "https://instagram.com/plotxchennai";
 const TG_URL = "https://t.me/plotx7743";
@@ -949,13 +949,13 @@ function CTAStrip({ onEnquire }) {
         </div>
         <div style={{ display:"flex", gap:"12px", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", width: isMobile ? "100%" : "auto" }}>
           <div style={{ fontSize:"13px", color:T.slateM }}>
-            📧{" "}<a href="mailto:plotx.com@gmail.com" style={{ color:T.blue, textDecoration:"none", fontWeight:"600" }}>plotx.com@gmail.com</a>
+            📧{" "}<a href="mailto:sales@plotxrealty.com " style={{ color:T.blue, textDecoration:"none", fontWeight:"600" }}>sales@plotxrealty.com </a>
           </div>
           <div style={{ fontSize:"13px", color:T.slateM }}>
             📞{" "}
             <a href="tel:+919710918099" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9710918099</a>
             {" | "}
-            <a href="tel:+919944435256" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9944435256</a>
+            <a href="tel:+919944352567" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9944352567</a>
           </div>
           <div style={{ display:"flex", gap:"10px" }}>
             <button style={{ ...S.btn("primary"), padding:"12px 20px", flex: isMobile ? 1 : "none" }}
@@ -1048,7 +1048,7 @@ function MobileMenu({ open, onClose, setRoute, onEnquire, route }) {
           <p style={{ fontSize:"12px", color:T.muted, textAlign:"center" }}>
             📞 <a href="tel:+919710918099" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9710918099</a>
             {" | "}
-            <a href="tel:+919944435256" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9944435256</a>
+            <a href="tel:+919944352567" style={{ color:T.slate, fontWeight:"600", textDecoration:"none" }}>9944352567</a>
           </p>
         </div>
       </div>
@@ -1254,7 +1254,7 @@ function Footer({ logo, setRoute }) {
               ]},
               { title:"Contact", links:[
                 {l:"📍 Porur, Chennai",r:null},{l:"📞 9710918099",r:null},
-                {l:"📞 9944435256",r:null},{l:"📧 plotx.com@gmail.com",r:null}
+                {l:"📞 9944352567",r:null},{l:"📧 sales@plotxrealty.com",r:null}
               ]},
             ].map(col=>(
               <div key={col.title}>
