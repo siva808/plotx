@@ -9,6 +9,7 @@ const API = "https://plotx-backend-q3pq.onrender.com/api";
 const BASE_URL = "https://plotx-backend-q3pq.onrender.com";
 
 import banner from "/banner.jpg"
+import staticLogo from "/logoo.jpg"
 
 /* ── Mobile Hook ────────────────────────────────────────────────────── */
 function useIsMobile() {
@@ -1172,18 +1173,8 @@ function Navbar({ onEnquire, logo, setRoute, route }) {
         boxShadow: scrolled?"0 4px 24px rgba(0,0,0,0.1)":"0 1px 12px rgba(0,0,0,0.06)"
       }}>
         <div style={{ display:"flex", alignItems:"center", gap:"12px", cursor:"pointer" }} onClick={()=>setRoute("public")}>
-          {logo
-            ? <img src={logo} alt="PlotX Logo" style={{ height:"36px", objectFit:"contain" }} />
-            : (
-              <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-                <div style={{ width:"36px", height:"36px", borderRadius:"8px", background:T.blue, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:"900", fontSize:"16px" }}>P</div>
-                <div>
-                  <div style={{ fontWeight:"900", fontSize:"17px", letterSpacing:"-0.3px", color:T.slate, lineHeight:1 }}>Plot X</div>
-                  <div style={{ fontSize:"10px", color:T.muted, letterSpacing:"1.2px", textTransform:"uppercase" }}>Real Estate</div>
-                </div>
-              </div>
-            )
-          }
+        <img src={staticLogo} alt="PlotX Logo" style={{ height:"36px", objectFit:"contain",borderRadius:"24px" }} /> 
+         
         </div>
 
         {isMobile ? (
@@ -1309,15 +1300,8 @@ function Footer({ logo, setRoute }) {
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1fr 1fr 1fr", gap: isMobile ? "32px 20px" : "40px", marginBottom: isMobile ? "32px" : "48px" }}>
             <div style={{ gridColumn: isMobile ? "1 / -1" : "auto" }}>
               <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"16px", cursor:"pointer" }} onClick={() => setRoute("public")}>
-                {logo
-                  ? <img src={logo} alt="PlotX" style={{ height:"36px", objectFit:"contain" }} />
-                  : (
-                    <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-                      <div style={{ width:"32px",height:"32px",borderRadius:"6px",background:T.blue,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:"900",fontSize:"14px" }}>P</div>
-                      <span style={{ color:"#fff",fontWeight:"800",fontSize:"16px" }}>Plot X</span>
-                    </div>
-                  )
-                }
+                        <img src={staticLogo} alt="PlotX Logo" style={{ height:"36px", objectFit:"contain",borderRadius:"24px" }} /> 
+
               </div>
               <p style={{ fontSize:"13px", lineHeight:"1.7", maxWidth:"260px", margin:"0 0 20px" }}>
                 Trusted property experts in Chennai. Your dream property is just one conversation away.
