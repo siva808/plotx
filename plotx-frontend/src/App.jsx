@@ -8,6 +8,8 @@ const TG_URL = "https://t.me/plotx7743";
 const API = "https://plotx-backend-q3pq.onrender.com/api";
 const BASE_URL = "https://plotx-backend-q3pq.onrender.com";
 
+import banner from "/banner.jpg"
+
 /* ── Mobile Hook ────────────────────────────────────────────────────── */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -510,6 +512,12 @@ const SERVICE_INFO = {
     ],
     process: ["Site Visit", "Document Verification", "Agreement", "Registration", "Handover"],
     cta: "Book a Free Site Visit",
+    highlights: [
+      { label: "Residential Plots", icon: "🏡" },
+      { label: "Independent Villas", icon: "🏘️" },
+      { label: "Commercial Spaces", icon: "🏢" },
+      { label: "Agricultural Land", icon: "🌾" },
+    ],
   },
   construction: {
     key: "construction",
@@ -528,6 +536,12 @@ const SERVICE_INFO = {
     ],
     process: ["Design & Plan", "Foundation", "Structure", "Finishing", "Handover"],
     cta: "Get a Free Construction Quote",
+    highlights: [
+      { label: "Home Construction", icon: "🏠" },
+      { label: "Architectural Design", icon: "📐" },
+      { label: "Renovations", icon: "🔨" },
+      { label: "Commercial Build", icon: "🏬" },
+    ],
   },
   interior: {
     key: "interior",
@@ -546,6 +560,12 @@ const SERVICE_INFO = {
     ],
     process: ["Consultation", "3D Design", "Material Selection", "Execution", "Styling & Handover"],
     cta: "Get a Free Design Consultation",
+     highlights: [
+      { label: "Modular Kitchen", icon: "🍳" },
+      { label: "Living Room", icon: "🛋️" },
+      { label: "Bedroom Interiors", icon: "🛏️" },
+      { label: "Commercial Interiors", icon: "🏢" },
+    ],
   },
 };
 
@@ -554,6 +574,21 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
   const [posters, setPosters] = useState([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+const [selectedCategory, setSelectedCategory] = useState("All");
+const categories = [
+  { label: "All", icon: "✨" },
+  ...(info?.highlights || []),
+];
+
+const filteredPosters =
+  selectedCategory === "All"
+    ? posters
+    : posters.filter(
+        (poster) =>
+          poster.sub_category?.trim().toLowerCase() ===
+          selectedCategory.trim().toLowerCase()
+      );
+ 
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -608,6 +643,9 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
         </div>
       </div>
 
+      {/* banner */}
+      <div style={{width:"100%",height:"400px"}}><img src={banner} alt="banner" style={{objectFit:"cover",width:"100%",height:"100%"}} /></div>
+
       {/* Process Bar */}
       <div style={{ background:T.white, borderBottom:`1px solid ${T.line}`, padding: isMobile ? "24px 16px" : "32px 0", overflowX:"auto" }}>
         <div style={{ maxWidth:"1000px", margin:"0 auto", padding: isMobile ? "0" : "0 48px" }}>
@@ -651,8 +689,60 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
         </div>
       </section>
 
+ 
+
       {/* Listings */}
-      <section style={{ background:T.white, padding: isMobile ? "48px 0" : "80px 0" }}>
+      <section style={{ background:T.white, padding: isMobile ? "48px 0" : "40px 0" }}>
+   <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    padding: "10px 0px 40px",
+    gap: "12px",
+    flexWrap: "wrap",
+  }}
+>
+  {categories.map((item) => {
+    const isActive = selectedCategory === item.label;
+
+    return (
+      <button
+        key={item.label}
+        onClick={() => setSelectedCategory(item.label)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "14px 16px",
+          borderRadius: "12px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "600",
+          transition: "all 0.2s ease",
+
+          border: isActive
+            ? "1px solid #2563EB"
+            : "1px solid #DBEAFE",
+
+          background: isActive
+            ? "#2563EB"
+            : "#F8FAFC",
+
+          color: isActive
+            ? "#FFFFFF"
+            : "#1E3A8A",
+
+          boxShadow: isActive
+            ? "0 4px 12px rgba(37,99,235,0.25)"
+            : "none",
+        }}
+      >
+        <span style={{ fontSize: "20px" }}>{item.icon}</span>
+        <span>{item.label}</span>
+      </button>
+    );
+  })}
+</div>
         <div style={{ padding: isMobile ? "0 16px" : "0 48px", maxWidth:"1200px", margin:"0 auto" }}>
           <div style={{ display:"flex", alignItems: isMobile ? "flex-start" : "center", justifyContent:"space-between", marginBottom:"32px", flexDirection: isMobile ? "column" : "row", gap:"16px" }}>
             <div>
@@ -671,7 +761,7 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
               <div style={{ fontSize:"2rem", marginBottom:"12px", opacity:.4 }}>⏳</div>
               <p>Loading listings…</p>
             </div>
-          ) : posters.length === 0 ? (
+          ) : filteredPosters .length === 0 ? (
             <div style={{
               textAlign:"center", padding:"60px 24px",
               background:T.bg, borderRadius:"12px", border:`2px dashed ${T.line}`
@@ -681,7 +771,7 @@ function ServicePage({ serviceKey, onEnquire, onBack }) {
             </div>
           ) : (
             <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill,minmax(290px,1fr))", gap:"20px" }}>
-              {posters.map(p => (
+              {filteredPosters .map(p => (
                 <PosterCard key={p.id} poster={p}
                   onEnquire={() => onEnquire(`${p.title} — ${info.label}`, info.label)} />
               ))}
@@ -1728,6 +1818,9 @@ export default function App() {
       <Navbar onEnquire={openLead} logo={logo} setRoute={handleSetRoute} route={route}/>
       <HeroCarousel onEnquire={openLead} setRoute={handleSetRoute}/>
       <TrustBar/>
+      {/* banner */}
+      <div style={{width:"100%",height:"400px"}}><img src={banner} alt="banner" style={{objectFit:"cover",width:"100%",height:"100%"}} /></div>
+
       <div id="services">
         <ServicesSection onEnquire={openLead} setRoute={handleSetRoute}/>
       </div>
