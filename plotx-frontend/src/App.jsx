@@ -7,9 +7,24 @@ const IG_URL = "https://instagram.com/plotxchennai";
 const TG_URL = "https://t.me/plotx7743";
 const API = "https://plotx-backend-q3pq.onrender.com/api";
 const BASE_URL = "https://plotx-backend-q3pq.onrender.com";
+const HEALTH_URL = "https://plotx-backend-q3pq.onrender.com/health";
 
-import banner from "/banner.jpg"
+import banner from "/banner0.jpeg"
 import staticLogo from "/logoo.jpg"
+import banner1 from "/baner1.jpeg"
+import banner2 from "/banner2.jpeg"
+import banner3 from "/banner3.jpeg"
+
+function useKeepAlive() {
+  useEffect(() => {
+    fetch(HEALTH_URL).catch(() => {});
+    const interval = setInterval(() => {
+      fetch(HEALTH_URL).catch(() => {});
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+}
+
 
 /* ── Mobile Hook ────────────────────────────────────────────────────── */
 function useIsMobile() {
@@ -320,7 +335,7 @@ function HeroCarousel({ onEnquire, setRoute }) {
 
 /* ── Lead Modal ────────────────────────────────────────────────────────── */
 function LeadModal({ open, onClose, context, service }) {
-  const [form, setForm] = useState({ name:"", email:"", mobile:"" });
+  const [form, setForm] = useState({ name:"", email:"", mobile:"", interest:"" });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -341,6 +356,7 @@ function LeadModal({ open, onClose, context, service }) {
           name: form.name,
           email: form.email,
           mobile: form.mobile,
+          interest: form.interest,
           service,
           source_context: context,
         }),
@@ -349,7 +365,7 @@ function LeadModal({ open, onClose, context, service }) {
       setTimeout(() => {
         setDone(false);
         onClose();
-        setForm({ name:"", email:"", mobile:"" });
+        setForm({ name:"", email:"", mobile:"" , interest:""});
       }, 2200);
     } catch (err) {
       setError("Failed to submit. Please try WhatsApp instead.");
@@ -411,6 +427,32 @@ function LeadModal({ open, onClose, context, service }) {
                 />
               </div>
             ))}
+
+            {/* ── Interest Dropdown ── */}
+            <div style={{ marginBottom:"14px" }}>
+              <label style={S.label}>I Am Looking To</label>
+              <select
+                style={{
+                  ...S.input,
+                  fontSize:"16px",
+                  cursor:"pointer",
+                  color: form.interest ? T.slate : T.muted,
+                }}
+                value={form.interest}
+                onChange={e => setForm({...form, interest: e.target.value})}
+                onFocus={e => e.target.style.borderColor = T.blue}
+                onBlur={e => e.target.style.borderColor = T.line}
+              >
+                <option value="" disabled>Select your interest…</option>
+                <option value="Buying">🏠 Buying a Property</option>
+                <option value="Selling">💰 Selling a Property</option>
+                <option value="Commercial">🏢 Commercial Property</option>
+                <option value="Construction">🏗️ Construction</option>
+                <option value="Interior">🛋️ Interior Design</option>
+                <option value="Just Enquiring">💬 Just Enquiring</option>
+              </select>
+            </div>
+
             <button style={{ ...S.btn("primary"), width:"100%", marginTop:"8px", padding:"16px", fontSize:"16px" }}
               onClick={submit} disabled={loading}>
               {loading ? "Sending…" : "Submit Enquiry"}
@@ -538,7 +580,7 @@ const SERVICE_INFO = {
     process: ["Design & Plan", "Foundation", "Structure", "Finishing", "Handover"],
     cta: "Get a Free Construction Quote",
     highlights: [
-      { label: "Home Construction", icon: "🏠" },
+      { label: "Construction", icon: "🏠" },
       { label: "Architectural Design", icon: "📐" },
       { label: "Renovations", icon: "🔨" },
       { label: "Commercial Build", icon: "🏬" },
@@ -569,12 +611,113 @@ const SERVICE_INFO = {
     ],
   },
 };
+const FEATURED_POSTER = {
+  real_estate: {
+    img: banner1,
+    title: "Premium Plots in Porur",
+  },
+  construction: {
+    img: banner2,
+    title: "Turnkey Construction",
+  },
+  interior: {
+    img: banner3,
+    title: "Luxury Interiors",
+  },
+};
 
+function FeaturedPoster({ serviceKey }) {
+  const poster = FEATURED_POSTER[serviceKey];
+  if (!poster) return null;
+
+  const colorMap = {
+    real_estate: "#60A5FA",
+    construction: "#34D399",
+    interior: "#C084FC",
+  };
+  const glowColor = colorMap[serviceKey] || "#60A5FA";
+
+  return (
+    <div style={{
+      position: "absolute",
+      right: "-18px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: "110px",
+      zIndex: 10,
+    }}>
+      <style>{`
+        @keyframes glowPulse_${serviceKey} {
+          0%, 100% { box-shadow: 0 0 0 2px ${glowColor}, 0 0 14px 4px ${glowColor}88; }
+          50%       { box-shadow: 0 0 0 3px ${glowColor}, 0 0 28px 8px ${glowColor}cc; }
+        }
+      `}</style>
+
+      {/* Glowing border wrapper */}
+      <div style={{
+        padding: "3px",
+        borderRadius: "14px",
+        background: glowColor,
+        animation: `glowPulse_${serviceKey} 2s ease-in-out infinite`,
+      }}>
+        <div style={{
+          borderRadius: "12px",
+          overflow: "hidden",
+          background: "#0f172a",
+          position: "relative",
+        }}>
+          <img
+            src={poster.img}
+            alt={poster.title}
+            style={{
+              width: "100%",
+              aspectRatio: "3/4",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+          {/* Title overlay */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
+            padding: "20px 8px 8px",
+          }}>
+            <p style={{
+              color: "#fff", fontSize: "9px", fontWeight: "700",
+              margin: 0, lineHeight: "1.3",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}>{poster.title}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured badge */}
+      <div style={{
+        position: "absolute", top: "-10px", left: "50%",
+        transform: "translateX(-50%)",
+        background: glowColor,
+        color: "#fff", fontSize: "8px", fontWeight: "800",
+        padding: "3px 8px", borderRadius: "10px",
+        letterSpacing: "0.8px", textTransform: "uppercase",
+        whiteSpace: "nowrap",
+        boxShadow: `0 2px 8px ${glowColor}88`,
+      }}>⚡ Featured</div>
+    </div>
+  );
+}
 function ServicePage({ serviceKey, onEnquire, onBack }) {
   const info = SERVICE_INFO[serviceKey];
   const [posters, setPosters] = useState([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  const bannerMap = {
+  real_estate: banner1,
+  construction: banner3,
+  interior: banner2,
+};
 const [selectedCategory, setSelectedCategory] = useState("All");
 const categories = [
   { label: "All", icon: "✨" },
@@ -608,12 +751,77 @@ const filteredPosters =
         display:"flex", alignItems:"center", position:"relative", overflow:"hidden"
       }}>
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.2) 100%)" }} />
-        {!isMobile && (
-          <div style={{
-            position:"absolute", right:"8%", top:"50%", transform:"translateY(-50%)",
-            fontSize:"clamp(120px,18vw,220px)", opacity:0.07, userSelect:"none"
-          }}>{info.icon}</div>
-        )}
+       {/* here the featured */}
+       {!isMobile && (
+  <div style={{
+    position: "absolute",
+    right: "8%",
+    top: "50%",
+    transform: "translateY(-50%)",
+    width: "250px",
+    zIndex: 2,
+  }}>
+    <style>{`
+      @keyframes glowPulse_page_${serviceKey} {
+        0%, 100% { box-shadow: 0 0 0 2px ${info.accent}, 0 0 20px 6px ${info.accent}88; }
+        50%       { box-shadow: 0 0 0 4px ${info.accent}, 0 0 40px 12px ${info.accent}cc; }
+      }
+    `}</style>
+
+    {/* Glowing border wrapper */}
+    <div style={{
+      padding: "4px",
+      borderRadius: "16px",
+      background: info.accent,
+      animation: `glowPulse_page_${serviceKey} 2s ease-in-out infinite`,
+    }}>
+      <div style={{
+        borderRadius: "13px",
+        overflow: "hidden",
+        background: "#0f172a",
+        position: "relative",
+      }}>
+        <img
+          src={FEATURED_POSTER[serviceKey]?.img}
+          alt={info.label}
+          style={{
+            width: "100%",
+            aspectRatio: "3/4",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+        {/* Title overlay */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          background: "linear-gradient(to top, rgba(0,0,0,0.9), transparent)",
+          padding: "28px 12px 12px",
+        }}>
+          <p style={{
+            color: "#fff", fontSize: "11px", fontWeight: "700",
+            margin: 0, lineHeight: "1.4",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}>{FEATURED_POSTER[serviceKey]?.title}</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Featured badge */}
+    <div style={{
+      position: "absolute", top: "-12px", left: "50%",
+      transform: "translateX(-50%)",
+      background: info.accent,
+      color: "#fff", fontSize: "9px", fontWeight: "800",
+      padding: "4px 10px", borderRadius: "10px",
+      letterSpacing: "0.8px", textTransform: "uppercase",
+      whiteSpace: "nowrap",
+      boxShadow: `0 2px 10px ${info.accent}88`,
+    }}>⚡ Featured</div>
+  </div>
+)}
         <div style={{ position:"relative", zIndex:2, padding: isMobile ? "40px 20px 48px" : "60px clamp(24px,6vw,96px)" }}>
           <button onClick={onBack} style={{
             background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.25)",
@@ -645,8 +853,13 @@ const filteredPosters =
       </div>
 
       {/* banner */}
-      <div style={{width:"100%",height:"400px"}}><img src={banner} alt="banner" style={{objectFit:"cover",width:"100%",height:"100%"}} /></div>
-
+      <div style={{width:"100%",height:"600px"}}>
+  <img 
+    src={bannerMap[serviceKey] || banner} 
+    alt="banner" 
+    style={{width:"100%", height:"100%"}} 
+  />
+</div>
       {/* Process Bar */}
       <div style={{ background:T.white, borderBottom:`1px solid ${T.line}`, padding: isMobile ? "24px 16px" : "32px 0", overflowX:"auto" }}>
         <div style={{ maxWidth:"1000px", margin:"0 auto", padding: isMobile ? "0" : "0 48px" }}>
@@ -1173,8 +1386,13 @@ function Navbar({ onEnquire, logo, setRoute, route }) {
         boxShadow: scrolled?"0 4px 24px rgba(0,0,0,0.1)":"0 1px 12px rgba(0,0,0,0.06)"
       }}>
         <div style={{ display:"flex", alignItems:"center", gap:"12px", cursor:"pointer" }} onClick={()=>setRoute("public")}>
-        <img src={staticLogo} alt="PlotX Logo" style={{ height:"36px", objectFit:"contain",borderRadius:"24px" }} /> 
-         
+        <img src={staticLogo} alt="PlotX Logo" style={{ height:"46px", objectFit:"contain",borderRadius:"24px" }} /> 
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+             <div>
+                <div style={{ fontWeight:"900", fontSize:"17px", letterSpacing:"-0.3px", color:T.slate, lineHeight:1 }}>Plot X</div>
+                <div style={{ fontSize:"10px", color:T.muted, letterSpacing:"1.2px", textTransform:"uppercase" }}>Real Estate</div>
+              </div>
+            </div>
         </div>
 
         {isMobile ? (
@@ -1300,8 +1518,15 @@ function Footer({ logo, setRoute }) {
           <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1fr 1fr 1fr", gap: isMobile ? "32px 20px" : "40px", marginBottom: isMobile ? "32px" : "48px" }}>
             <div style={{ gridColumn: isMobile ? "1 / -1" : "auto" }}>
               <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"16px", cursor:"pointer" }} onClick={() => setRoute("public")}>
-                        <img src={staticLogo} alt="PlotX Logo" style={{ height:"36px", objectFit:"contain",borderRadius:"24px" }} /> 
-
+                        <img src={staticLogo} alt="PlotX Logo" style={{ height:"46px", objectFit:"contain",borderRadius:"24px" }} /> 
+                      
+            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+              <div>
+                <div style={{ fontWeight:"900", fontSize:"17px", letterSpacing:"-0.3px", color:T.slate, lineHeight:1 }}>Plot X</div>
+                <div style={{ fontSize:"10px", color:T.muted, letterSpacing:"1.2px", textTransform:"uppercase" }}>Real Estate</div>
+              </div>
+            </div>
+          
               </div>
               <p style={{ fontSize:"13px", lineHeight:"1.7", maxWidth:"260px", margin:"0 0 20px" }}>
                 Trusted property experts in Chennai. Your dream property is just one conversation away.
@@ -1432,7 +1657,7 @@ function AdminDashboard({ onLogout }) {
   const [tab, setTab] = useState("leads");
   const [leads, setLeads] = useState([]);
   const [posters, setPosters] = useState([]);
-  const [upload, setUpload] = useState({ title:"", description:"", category:"real_estate", file:null, preview:null });
+  const [upload, setUpload] = useState({ title:"", description:"", category:"real_estate", sub_category:"", file:null, preview:null });
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("success");
@@ -1509,10 +1734,11 @@ function AdminDashboard({ onLogout }) {
       formData.append("title", upload.title);
       formData.append("description", upload.description || "");
       formData.append("category", upload.category);
+      if (upload.sub_category) formData.append("sub_category", upload.sub_category);
       if (upload.file) formData.append("image", upload.file);
       await apiFetch("/admin/posters", { method:"POST", body: formData });
       showMsg("✓ Poster uploaded successfully");
-      setUpload({ title:"", description:"", category:"real_estate", file:null, preview:null });
+      setUpload({ title:"", description:"", category:"real_estate", sub_category:"", file:null, preview:null });
       fetchPosters();
     } catch (e) {
       showMsg(`Upload failed: ${e.message}`, "error");
@@ -1548,7 +1774,7 @@ function AdminDashboard({ onLogout }) {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
 
-  const tabs = [["leads","Leads"],["content","Content"],["upload","Upload"],["settings","Settings"]];
+  const tabs = [["leads","Leads"],["content","Content"],["upload","Upload"]];
 
   return (
     <div style={S.page}>
@@ -1610,7 +1836,10 @@ function AdminDashboard({ onLogout }) {
                           <p style={{ fontWeight:"700", color:T.slate, margin:"0 0 2px", fontSize:"15px" }}>{l.name}</p>
                           <a href={`tel:+91${l.mobile}`} style={{ color:T.blue, fontWeight:"600", textDecoration:"none", fontSize:"14px" }}>{l.mobile}</a>
                         </div>
-                        <span style={S.tag(catMeta[l.service?.toLowerCase().replace(/ /g,"_")]?.color||T.blue)}>{l.service||"—"}</span>
+                        <div style={{ display:"flex", flexDirection:"column", gap:"4px", alignItems:"flex-end" }}>
+                          <span style={S.tag(catMeta[l.service?.toLowerCase().replace(/ /g,"_")]?.color||T.blue)}>{l.service||"—"}</span>
+                          <span style={S.tag(T.amber)}>{l.interest||"—"}</span>
+                        </div>
                       </div>
                       <p style={{ color:T.muted, fontSize:"12px", margin:"0 0 6px" }}>{l.email}</p>
                       <p style={{ color:T.muted, fontSize:"11px", margin:0 }}>{l.source_context||"—"} · {new Date(l.created_at).toLocaleDateString()}</p>
@@ -1624,7 +1853,7 @@ function AdminDashboard({ onLogout }) {
                     <table style={{ width:"100%",borderCollapse:"collapse",fontSize:"13px" }}>
                       <thead style={{ background:T.bg }}>
                         <tr>
-                          {["Name","Email","Mobile","Service","Context","Date"].map(h=>(
+                          {["Name","Email","Mobile","Interest","Service","Context","Date"].map(h=>(
                             <th key={h} style={{ padding:"14px 16px",textAlign:"left",color:T.muted,fontWeight:"700",letterSpacing:"0.8px",fontSize:"11px",textTransform:"uppercase",borderBottom:`1px solid ${T.line}` }}>{h}</th>
                           ))}
                         </tr>
@@ -1634,8 +1863,13 @@ function AdminDashboard({ onLogout }) {
                           <tr key={l.id} style={{ borderBottom:`1px solid ${T.line}`,background:i%2===0?"transparent":"#FAFAFA" }}>
                             <td style={{ padding:"14px 16px",color:T.slate,fontWeight:"600" }}>{l.name}</td>
                             <td style={{ padding:"14px 16px",color:T.slateM }}>{l.email}</td>
-                            <td style={{ padding:"14px 16px" }}>
+                           <td style={{ padding:"14px 16px" }}>
                               <a href={`tel:+91${l.mobile}`} style={{ color:T.blue,fontWeight:"600",textDecoration:"none" }}>{l.mobile}</a>
+                            </td>
+                            <td style={{ padding:"14px 16px" }}>
+                              <span style={S.tag(T.amber)}>
+                                {l.interest||"—"}
+                              </span>
                             </td>
                             <td style={{ padding:"14px 16px" }}>
                               <span style={S.tag(catMeta[l.service?.toLowerCase().replace(/ /g,"_")]?.color||T.blue)}>
@@ -1671,8 +1905,11 @@ function AdminDashboard({ onLogout }) {
                         <img src={`${BASE_URL}${p.image_path}`} alt={p.title}
                           style={{ width:"100%",aspectRatio:"4/3",objectFit:"cover",borderRadius:"8px",marginBottom:"10px",display:"block" }}/>
                       )}
-                      <span style={S.tag(catMeta[p.category]?.color||T.blue)}>{catMeta[p.category]?.label}</span>
-                      <h3 style={{ color:T.slate,fontSize:"13px",fontWeight:"700",margin:"8px 0 4px" }}>{p.title}</h3>
+                     <div style={{ display:"flex", gap:"6px", flexWrap:"wrap", marginBottom:"8px" }}>
+                        <span style={S.tag(catMeta[p.category]?.color||T.blue)}>{catMeta[p.category]?.label}</span>
+                        {p.sub_category && <span style={S.tag(T.amber)}>{p.sub_category}</span>}
+                      </div>
+                      <h3 style={{ color:T.slate,fontSize:"13px",fontWeight:"700",margin:"0 0 4px" }}>{p.title}</h3>
                       <p style={{ color:T.muted,fontSize:"11px",marginBottom:"10px" }}>{p.description}</p>
                       <button onClick={()=>deletePoster(p.id)}
                         style={{ ...S.btn("outline"),width:"100%",padding:"8px",color:T.red,borderColor:T.red,fontSize:"12px" }}>
@@ -1709,10 +1946,35 @@ function AdminDashboard({ onLogout }) {
               ))}
               <div style={{ marginBottom:"16px" }}>
                 <label style={S.label}>Category *</label>
-                <select style={{ ...S.input,fontSize:"16px" }} value={upload.category} onChange={e=>setUpload({...upload,category:e.target.value})}>
+                <select style={{ ...S.input,fontSize:"16px" }} value={upload.category} onChange={e=>setUpload({...upload, category:e.target.value, sub_category:""})}>
                   <option value="real_estate">Real Estate</option>
                   <option value="construction">Construction</option>
                   <option value="interior">Interior Design</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom:"16px" }}>
+                <label style={S.label}>Sub Category</label>
+                <select style={{ ...S.input,fontSize:"16px" }} value={upload.sub_category||""} onChange={e=>setUpload({...upload,sub_category:e.target.value})}>
+                  <option value="">Select sub category…</option>
+                  {upload.category === "real_estate" && <>
+                    <option value="Residential Plots">🏡 Residential Plots</option>
+                    <option value="Independent Villas">🏘️ Independent Villas</option>
+                    <option value="Commercial Spaces">🏢 Commercial Spaces</option>
+                    <option value="Agricultural Land">🌾 Agricultural Land</option>
+                  </>}
+                  {upload.category === "construction" && <>
+                    <option value="Construction">🏠 Construction</option>
+                    <option value="Architectural Design">📐 Architectural Design</option>
+                    <option value="Renovations">🔨 Renovations</option>
+                    <option value="Commercial Build">🏬 Commercial Build</option>
+                  </>}
+                  {upload.category === "interior" && <>
+                    <option value="Modular Kitchen">🍳 Modular Kitchen</option>
+                    <option value="Living Room">🛋️ Living Room</option>
+                    <option value="Bedroom Interiors">🛏️ Bedroom Interiors</option>
+                    <option value="Commercial Interiors">🏢 Commercial Interiors</option>
+                  </>}
                 </select>
               </div>
               <div style={{ marginBottom:"24px" }}>
@@ -1757,6 +2019,7 @@ function AdminDashboard({ onLogout }) {
 
 /* ── Root App ────────────────────────────────────────────────────────── */
 export default function App() {
+  useKeepAlive();
   const [route, setRoute] = useState("public");
   const [authed, setAuthed] = useState(!!localStorage.getItem("plotx_token"));
   const [modal, setModal] = useState({ open:false, context:"", service:"" });
@@ -1803,7 +2066,7 @@ export default function App() {
       <HeroCarousel onEnquire={openLead} setRoute={handleSetRoute}/>
       <TrustBar/>
       {/* banner */}
-      <div style={{width:"100%",height:"400px"}}><img src={banner} alt="banner" style={{objectFit:"cover",width:"100%",height:"100%"}} /></div>
+      <div style={{width:"100%",height:"800px"}}><img src={banner} alt="banner" style={{width:"100%",height:"100%"}} /></div>
 
       <div id="services">
         <ServicesSection onEnquire={openLead} setRoute={handleSetRoute}/>

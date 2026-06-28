@@ -29,8 +29,8 @@ class Poster(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-    # NEW - with name ✅
     category = db.Column(db.Enum('real_estate', 'construction', 'interior', name='poster_category'), nullable=False)
+    sub_category = db.Column(db.String(100))  
     image_path = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
@@ -39,6 +39,7 @@ class Lead(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     mobile = db.Column(db.String(20), nullable=False)
+    interest = db.Column(db.String(100))        
     service = db.Column(db.String(100))
     source_context = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
@@ -71,8 +72,12 @@ def get_posters():
         q = q.filter_by(category=category)
     posters = q.order_by(Poster.created_at.desc()).all()
     return jsonify([{
-        'id': p.id, 'title': p.title, 'description': p.description,
-        'category': p.category, 'image_path': p.image_path,
+        'id': p.id,
+        'title': p.title,
+        'description': p.description,
+        'category': p.category,
+        'sub_category': p.sub_category,   # ← NEW
+        'image_path': p.image_path,
         'created_at': p.created_at.isoformat()
     } for p in posters])
 
@@ -80,8 +85,12 @@ def get_posters():
 def submit_lead():
     data = request.json
     lead = Lead(
-        name=data['name'], email=data['email'], mobile=data['mobile'],
-        service=data.get('service'), source_context=data.get('source_context')
+        name=data['name'],
+        email=data['email'],
+        mobile=data['mobile'],
+        interest=data.get('interest'),         # ← NEW
+        service=data.get('service'),
+        source_context=data.get('source_context')
     )
     db.session.add(lead)
     db.session.commit()
@@ -116,6 +125,7 @@ def upload_poster():
     title = request.form.get('title')
     description = request.form.get('description')
     category = request.form.get('category')
+    sub_category = request.form.get('sub_category')   # ← NEW
     image_path = None
     if 'image' in request.files:
         f = request.files['image']
@@ -123,7 +133,13 @@ def upload_poster():
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         f.save(path)
         image_path = f'/uploads/{filename}'
-    poster = Poster(title=title, description=description, category=category, image_path=image_path)
+    poster = Poster(
+        title=title,
+        description=description,
+        category=category,
+        sub_category=sub_category,   # ← NEW
+        image_path=image_path
+    )
     db.session.add(poster)
     db.session.commit()
     return jsonify({'message': 'Poster uploaded', 'id': poster.id}), 201
@@ -141,8 +157,13 @@ def delete_poster(pid):
 def get_leads():
     leads = Lead.query.order_by(Lead.created_at.desc()).all()
     return jsonify([{
-        'id': l.id, 'name': l.name, 'email': l.email, 'mobile': l.mobile,
-        'service': l.service, 'source_context': l.source_context,
+        'id': l.id,
+        'name': l.name,
+        'email': l.email,
+        'mobile': l.mobile,
+        'interest': l.interest,           # ← NEW
+        'service': l.service,
+        'source_context': l.source_context,
         'created_at': l.created_at.isoformat()
     } for l in leads])
 
